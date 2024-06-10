@@ -1,0 +1,17 @@
+{
+    "manifest_version": 3,
+    "name": "Harun Face to Sticker",
+    "version": "1.0",
+    "description": "A minimalistic Ai powered sticker maker",
+    "icons": {
+        "128": "128.png"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "action": {
+        "default_icon": "128.png",
+        "default_popup": "popup.html"
+    },
+    "permissions": ["storage", "tabs"]
+}

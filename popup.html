@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <link href="./output.css" rel="stylesheet">
+    <title> Harun Face to Sticker </title>
+    <style>
+        .star {
+            color: #dfdfd7;
+        }
+        .star.hovered {
+            color: #EAB308;
+        }
+        .star.red {
+            color: red;
+        }
+    </style>
+</head>
+<body class="w-[400px] h-auto bg-background py-8 rounded-sm">
+    <div class="flex flex-col items-center">
+        <h2 class="text-2xl text-primary"> Harun Face to Sticker </h2>
+        <input type="file" accept=".png, .jpeg, .jpg" id="fileInput" class="text-base text-primary ml-20 mt-10" />
+        <div id="show-image" class="mt-6"></div>
+        <button id="uploadBtn" disabled class="bg-button w-[225px] mt-10 px-4 py-2.5 rounded-md focus-visible:outline-none disabled:cursor-not-allowed">
+            <p class="text-base text-black font-semibold"> Upload </p>
+        </button>
+        <div class="mt-10 flex flex-col items-start justify-start gap-6">
+            <h3 class="text-2xl text-main font-semibold ml-2"> Give us a rating </h3>
+            <div id="star-widget" class="flex space-x-3 mt-3">
+                <i class="star fa fa-star text-2xl cursor-pointer"></i>
+                <i class="star fa fa-star text-2xl cursor-pointer"></i>
+                <i class="star fa fa-star text-2xl cursor-pointer"></i>
+                <i class="star fa fa-star text-2xl cursor-pointer"></i>
+                <i class="star fa fa-star text-2xl cursor-pointer"></i>
+            </div>
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>

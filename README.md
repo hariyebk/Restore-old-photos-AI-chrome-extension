@@ -1,0 +1,1 @@
+#### Face to Sticker AI chrome extension
