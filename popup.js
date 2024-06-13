@@ -1,43 +1,43 @@
-const ImageDisplay = document.getElementById("show-image")
 const FileInput = document.getElementById("fileInput")
+const promptInput = document.getElementById("prompt")
+const tokenInput = document.getElementById("token")
 const UploadButton = document.getElementById("uploadBtn")
+const promptError = document.getElementById("prompt-message")
+const operationError = document.getElementById("operation-error")
+const starContainer = document.getElementById("star-widget")
 const stars = document.querySelectorAll(".star")
+const REPLICATE_API_URI = "https://api.replicate.com/v1/predictions"
 
-const REPLICATE_API_KEY = "r8_Sffz2a3bolPhDDFn1SkhZ1cAfBXVo0s20gdG2"
-const REPLICATE_API_URI = "https://api.replicate.com/v1/files"
-const REPLICATE_HEADERS = {
-    'Authorization': `Bearer ${REPLICATE_API_KEY}`,
-    'Content-Type': 'multipart/form-data'
-};
-// const CLOUD_NAME = "du7hqfwso"
-// const CLOUDINARY_BASE_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`
-// const CLOUDINARY_API_KEY = "896567121931742"
-// const CLOUDINARY_API_SECRET = "fmHx8YV_w_YxiadEULI5eOgutP4"
 let files
 FileInput.addEventListener("change", (event) => {
     files = event.target.files
     if(files.length > 0){
-        // clear out previous result
-        ImageDisplay.innerHTML = ``
         // Enable the button for upload
         UploadButton.disabled = false
-        // Create a new image element to be inserted
-        const img = document.createElement("img")
-        // insert the file as the source for the image
-        img.src = URL.createObjectURL(files[0])
-        img.alt = "image"
-        img.id = "selected-image"
-        img.width = 230
-        img.height = 200
-        img.className="rounded-md"
-        // Update the DOM
-        ImageDisplay.appendChild(img)
+        // clear if there were any errors on the previous result
+        operationError.innerHTML = ``
     }
 })
 
 UploadButton.addEventListener("click", async () => {
     // check again if the image has been uploaded and the button is not disabled
     if(files.length === 0 || UploadButton.getAttribute("disabled")) return 
+    // check if prompt is provided
+    const prompt = promptInput.value
+    if(!prompt){
+        promptError.innerHTML= `
+            <p class="text-red-500 text-sm font-semibold"> prompt is required </p>
+        `
+        return
+    }
+    else{
+        // Clear if there is a prompt error
+        promptError.innerHTML = ``
+    }
+    // clear if there were any previous errors.
+    operationError.innerHTML = ``
+    // disable the upload button
+    UploadButton.disabled = true
     // remove the content inside the buton
     UploadButton.innerHTML = ''
     // Add a spinner to notify the user that we are processing the request
@@ -47,16 +47,93 @@ UploadButton.addEventListener("click", async () => {
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <p class="text-black text-base font-semibold"> processing... </p>
+            <p class="text-black text-base font-semibold"> wait patiently </p>
         </div>
     `
-    // Disable the file input
+    // Disable the file fields and the stars
     FileInput.disabled = true
-    // chnage the opacity of the image
-    const selectedImage = document.getElementById("selected-image")
-    selectedImage.classList.add("opacity-75")
-    // send the image to replica to be processed
+    promptInput.disabled = true
+    tokenInput.disabled = true
+    starContainer.classList.add("hidden")
+    // store the prompt and token in the local storage
+    chrome.storage.local.set({ userData: {
+        prompt,
+        token: tokenInput.value
+    }}, function() {
+        console.log('user data saved locally');
+    });
 
+    const form = new FormData()
+    form.set("file", files[0])
+    form.set("prompt", prompt)
+
+    try{
+        if(tokenInput.value){
+            const response = await fetch("https://yegarabet.vercel.app/api/verifyToken", {
+                method: "POST",
+                body: JSON.stringify({
+                    token: tokenInput.value
+                })
+            })
+            const data = await response.json()
+            if(data.error){
+                throw new Error(data.error)
+            }
+        }
+        // Create a post request to the proxy server by sending the image
+        const response1 =  await fetch("https://yegarabet.vercel.app/api/create-prediction", {
+            method: "POST",
+            body: form
+        })
+        const data1 = await response1.json()
+        if(data1.error){
+            throw new Error(data1.error)
+        }
+        // Get the prediction id from the proxy server
+        const {predictionId} = data1
+        // A function to delay the execution because we need to Wait for the model to finish processing the image, then making a request to get the results
+        const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        // wait for 80 seconds 
+        await delay(80000)
+        // make a get request to the proxy server again
+        const response2 = await fetch("https://yegarabet.vercel.app/api/get-prediction", {
+            method: "POST",
+            body: JSON.stringify({
+                predictionId,
+                token: tokenInput.value 
+            })
+        })
+        const data2 = await response2.json()
+        // parse the response
+        if(data2.error){
+            throw new Error(data2.error)
+        }
+        const {outputs} = data2
+        // retrieve the first result from the outputs
+        const imageURL = outputs?.at(0).replaceAll("'", "")
+        // open it in a new tab
+        window.open(imageURL, "_blank");
+    }
+    catch(error){
+        // display the error
+        operationError.innerHTML = `
+            <p class="text-red-500 text-sm font-semibold mt-3"> ${error.message ? error.message : "something went wrong"} </p>
+        `
+        console.error(error)
+    }
+    finally{
+        // Enable the input fields
+        FileInput.disabled = false
+        promptInput.disabled = false
+        tokenInput.disabled = false
+        UploadButton.disabled = false
+        // return the upload button state to the original
+        UploadButton.innerHTML = `
+        <p class="text-base text-black font-semibold"> Upload </p>
+        `
+        // show the rating again
+        starContainer.classList.remove('hidden')
+    }
 })
 
 let currentRating = 0;
@@ -108,3 +185,17 @@ function resetStars() {
         star.classList.remove('red')
     });
 }
+
+// Litsening for the user to open our extension , then we will load the data from the storage to prompt and token of the last.
+document.addEventListener('DOMContentLoaded', function() {
+    chrome.storage.local.get('userData', function(result) {
+        if (result.userData) {
+            const data = result.userData
+            promptInput.value = data.prompt
+            if(data.token){
+                tokenInput.value = data.token
+            }
+        } 
+        else return 
+    });
+})
