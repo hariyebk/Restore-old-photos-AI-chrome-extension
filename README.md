@@ -1,5 +1,3 @@
-In that case, here's an updated README.md that focuses on running the extension locally:
-
 **Face to Sticker: AI-Powered Chrome Extension**
 =============================================
 
