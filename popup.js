@@ -104,8 +104,17 @@ UploadButton.addEventListener("click", async () => {
         const {predictionId} = data1
         // A function to delay the execution because we need to Wait for the model to finish processing the image, then making a request to get the results
         const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-        // wait for 80 seconds 
-        await delay(80000)
+        // wait for 85 seconds 
+        await delay(85000)
+        UploadButton.innerHTML = `
+        <div class="flex justify-center gap-2">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="text-black text-base font-semibold"> retrieving... </p>
+        </div>
+    `
         // make a get request to the proxy server again
         const response2 = await fetch("https://yegarabet.vercel.app/api/get-prediction", {
             method: "POST",
