@@ -47,14 +47,16 @@ UploadButton.addEventListener("click", async () => {
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <p class="text-black text-base font-semibold"> wait patiently </p>
+            <p class="text-black text-base font-semibold"> uploading... </p>
         </div>
     `
     // Disable the file fields and the stars
     FileInput.disabled = true
     promptInput.disabled = true
     tokenInput.disabled = true
-    starContainer.classList.add("hidden")
+    if(!starContainer.classList.contains("hidden")){
+        starContainer.classList.add("hidden")
+    }
     // store the prompt and token in the local storage
     chrome.storage.local.set({ userData: {
         prompt,
@@ -89,6 +91,15 @@ UploadButton.addEventListener("click", async () => {
         if(data1.error){
             throw new Error(data1.error)
         }
+        UploadButton.innerHTML = `
+        <div class="flex justify-center gap-2">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="text-black text-base font-semibold"> processing... </p>
+        </div>
+    `
         // Get the prediction id from the proxy server
         const {predictionId} = data1
         // A function to delay the execution because we need to Wait for the model to finish processing the image, then making a request to get the results
@@ -164,8 +175,16 @@ stars.forEach((star, index) => {
     
 
     // Lisening to the click event  to redirect the user based on the rating
-    star.addEventListener('click', () => {
+    star.addEventListener('click', async () => {
         currentRating = index + 1;
+        // store the rating to the local storage 
+        chrome.storage.local.set({ rating: {
+            status: true,
+            currentRating
+        }}, function(){
+            console.log('current rating saved locally')
+        });
+
         if (currentRating >= 4) {
             window.open("https://www.google.com/", "_blank");
         } 
@@ -196,6 +215,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 tokenInput.value = data.token
             }
         } 
-        else return 
     });
-})
+    chrome.storage.local.get("rating", function(result){
+        if(result.rating){
+            // hide the rating section from the DOM
+            starContainer.classList.add("hidden")
+        }
+        else return 
+    })
+}) 
