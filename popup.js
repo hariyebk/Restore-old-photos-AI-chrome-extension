@@ -2,13 +2,19 @@ const FileInput = document.getElementById("fileInput")
 const promptInput = document.getElementById("prompt")
 const tokenInput = document.getElementById("token")
 const UploadButton = document.getElementById("uploadBtn")
+const settingBtn = document.getElementById("setting")
+const closBtn = document.getElementById("close")
+const saveBtn = document.getElementById("save")
+const timer = document.getElementById("timer")
+const popupWindow = document.getElementById("popup")
 const promptError = document.getElementById("prompt-message")
 const operationError = document.getElementById("operation-error")
 const starContainer = document.getElementById("star-widget")
 const stars = document.querySelectorAll(".star")
 const REPLICATE_API_URI = "https://api.replicate.com/v1/predictions"
 
-let files
+let files, seconds = 0, timerInterval = null
+
 FileInput.addEventListener("change", (event) => {
     files = event.target.files
     if(files.length > 0){
@@ -20,6 +26,7 @@ FileInput.addEventListener("change", (event) => {
 })
 
 UploadButton.addEventListener("click", async () => {
+    startTimer()
     // check again if the image has been uploaded and the button is not disabled
     if(files.length === 0 || UploadButton.getAttribute("disabled")) return 
     // check if prompt is provided
@@ -54,6 +61,8 @@ UploadButton.addEventListener("click", async () => {
     FileInput.disabled = true
     promptInput.disabled = true
     tokenInput.disabled = true
+    settingBtn.disabled = true
+
     if(!starContainer.classList.contains("hidden")){
         starContainer.classList.add("hidden")
     }
@@ -74,7 +83,7 @@ UploadButton.addEventListener("click", async () => {
             const response = await fetch("https://yegarabet.vercel.app/api/verifyToken", {
                 method: "POST",
                 body: JSON.stringify({
-                    token: tokenInput.value
+                    token: tokenInput.value || null
                 })
             })
             const data = await response.json()
@@ -131,14 +140,16 @@ UploadButton.addEventListener("click", async () => {
         const {outputs} = data2
         // retrieve the first result from the outputs
         const imageURL = outputs?.at(0).replaceAll("'", "")
+        stopTimer()
         // open it in a new tab
         window.open(imageURL, "_blank");
     }
     catch(error){
         // display the error
         operationError.innerHTML = `
-            <p class="text-red-500 text-sm font-semibold mt-3"> ${error.message ? error.message : "something went wrong"} </p>
+        <p class="text-red-500 text-sm font-semibold mt-3"> ${error.message ? error.message : "something went wrong"} </p>
         `
+        stopTimer()
         console.error(error)
     }
     finally{
@@ -147,6 +158,7 @@ UploadButton.addEventListener("click", async () => {
         promptInput.disabled = false
         tokenInput.disabled = false
         UploadButton.disabled = false
+        settingBtn.disabled = false
         // return the upload button state to the original
         UploadButton.innerHTML = `
         <p class="text-base text-black font-semibold"> Upload </p>
@@ -233,3 +245,42 @@ document.addEventListener('DOMContentLoaded', function() {
         else return 
     })
 }) 
+
+// open the popup window
+settingBtn.addEventListener("click", () => {
+    popupWindow.classList.remove("hidden")
+    chrome.storage.local.get('apitoken', function(result) {
+        if (result.apitoken) {
+            tokenInput.value = result.apitoken
+        } 
+    });
+})
+
+// close the popup window
+closBtn.addEventListener("click", () => {
+    popupWindow.classList.add("hidden")
+})
+
+// save the API token to the local storage
+saveBtn.addEventListener("click", () => {
+    if(tokenInput.value){
+        chrome.storage.local.set({ apitoken: tokenInput.value}, function() {
+            console.log("token save locally")
+        });
+        popupWindow.classList.add("hidden")
+    }
+    else return
+})
+
+// A function that counts seconda 
+function startTimer(){
+    timerInterval = setInterval(() => {
+        seconds++;
+        timer.innerHTML = `<p class="text-primary text-base"> ${seconds} sec </p>`;
+    }, 1000)
+}
+
+// A function that stops the time
+function stopTimer(){
+    clearInterval(timerInterval)
+}
