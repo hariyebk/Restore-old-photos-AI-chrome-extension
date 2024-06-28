@@ -24,16 +24,34 @@
         <button id="setting" class="w-full flex justify-end mt-2 disabled:cursor-not-allowed">
             <img src="./cog.png" alt="setting-icon"class="w-5 h-5" />
         </button>
-        <div id="popup" class="bg-background absolute top-0 right-0 w-[300px] h-auto pb-8 px-7 rounded-md border border-slate-700 hidden">
+        <div id="popup" class="bg-background absolute top-0 right-0 w-[300px] h-[500px] overflow-y-scroll pb-8 px-7 rounded-md border border-slate-700 hidden">
             <div class="mr-2 mt-4">
                 <button id="close" class="w-full flex justify-end">
                     <img src="./close.png" alt="close-icon" class="w-5 h-5" />
                 </button>
             </div>
-            <div class="flex flex-col items-start gap-3">
-                <label class="text-base text-primary w-[225px] flex justify-start mt-3"> API token </label>
-                <input type="text" id="token" class="w-[225px] mt-3 bg-primary rounded-md px-3 py-2.5 text-sm text-black focus-visible:outline-none" />
-                <button id="save" class="bg-button w-[225px] mt-5 px-4 py-2 rounded-md focus-visible:outline-none text-base text-black font-semibold">
+            <div class="flex flex-col items-start gap-5">
+                <div class="flex flex-col items-start">
+                    <label class="text-base text-primary"> Width </label>
+                    <input type="text" id="width" placeholder="Ex. 1200" class="w-[200px] p-2 text-sm rounded-md mt-3 focus-visible:outline-none text-black" />
+                </div>
+                <div class="flex flex-col items-start">
+                    <label class="text-base text-primary"> Height </label>
+                    <input type="text" id="height" placeholder="Ex. 630" class="w-[200px] p-2 text-sm rounded-md mt-3 focus-visible:outline-none text-black" />
+                </div>
+                <div class="flex flex-col items-start">
+                    <label class="text-base text-primary"> Steps </label>
+                    <input type="text" id="steps" placeholder="Ex. 1" class="w-[200px] p-2 text-sm rounded-md mt-3 focus-visible:outline-none text-black" />
+                </div>
+                <div class="flex flex-col items-start">
+                    <label class="text-base text-primary"> Seed </label>
+                    <input type="text" id="seed" placeholder="Ex. 42" class="w-[200px] p-2 text-sm rounded-md mt-3 focus-visible:outline-none text-black" />
+                </div>
+                <div  class="flex flex-col items-start">
+                    <label class="text-base text-primary"> Api token </label>
+                    <input type="text" id="token" class="w-[200px] p-2 text-sm rounded-md mt-3 focus-visible:outline-none text-black" />
+                </div>
+                <button id="save" class="bg-button w-[200px] mt-5 px-4 py-2 rounded-md focus-visible:outline-none text-base text-black font-semibold">
                     Save
                 </button>
             </div>
@@ -43,8 +61,10 @@
         <h2 class="text-2xl text-primary"> Harun Face to Sticker </h2>
         <input type="file" accept=".png, .jpeg, .jpg" id="fileInput" class="text-base text-primary ml-20 mt-10 disabled:cursor-not-allowed" />
         <label class="text-base text-primary w-[225px] flex justify-start mt-6"> Prompt </label>
-        <input type="text" id="prompt" placeholder="Ex. cyborg vampire, clown ..." class="w-[225px] mt-5 bg-primary rounded-md px-3 py-2.5 text-sm text-black focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-secondary" />
+        <input type="text" id="prompt" placeholder="Ex. cyborg vampire, clown ..." class="w-[225px] mt-3 bg-primary rounded-md px-3 py-2.5 text-sm text-black focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-secondary" />
         <span id="prompt-message" class="w-[225px] flex justify-start mt-3"> </span>
+        <label class="text-base text-primary w-[225px] flex justify-start mt-3">  Negative prompt(optional) </label>
+        <input type="text" id="negative_prompt" placeholder="Things you don't want in the image" class="w-[225px] mt-3 bg-primary rounded-md px-3 py-2.5 text-sm text-black focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-secondary" />
         <span id="operation-error" class="w-[225px] flex justify-start mt-3"> </span>
         <div id="timer" class="mt-2"></div>
         <button id="uploadBtn" disabled class="bg-button w-[225px] mt-7 px-4 py-2.5 rounded-md focus-visible:outline-none disabled:cursor-not-allowed">

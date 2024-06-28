@@ -1,6 +1,11 @@
 const FileInput = document.getElementById("fileInput")
 const promptInput = document.getElementById("prompt")
 const tokenInput = document.getElementById("token")
+const width = document.getElementById("width")
+const height = document.getElementById("height")
+const steps = document.getElementById("steps")
+const seed = document.getElementById("seed")
+const negativePrompt = document.getElementById("negative_prompt")
 const UploadButton = document.getElementById("uploadBtn")
 const settingBtn = document.getElementById("setting")
 const closBtn = document.getElementById("close")
@@ -249,10 +254,12 @@ document.addEventListener('DOMContentLoaded', function() {
 // open the popup window
 settingBtn.addEventListener("click", () => {
     popupWindow.classList.remove("hidden")
-    chrome.storage.local.get('apitoken', function(result) {
-        if (result.apitoken) {
-            tokenInput.value = result.apitoken
-        } 
+    chrome.storage.local.get('config', function(result) {
+        width.value = result.config.width,
+        height.value = result.config.height,
+        steps.value = result.config.steps,
+        seed.value = result.config.seed,
+        tokenInput.value = result.config.token
     });
 })
 
@@ -263,13 +270,16 @@ closBtn.addEventListener("click", () => {
 
 // save the API token to the local storage
 saveBtn.addEventListener("click", () => {
-    if(tokenInput.value){
-        chrome.storage.local.set({ apitoken: tokenInput.value}, function() {
-            console.log("token save locally")
-        });
-        popupWindow.classList.add("hidden")
-    }
-    else return
+    chrome.storage.local.set({ config: {
+        width: width.value || null,
+        height: height.value || null,
+        steps: steps.value || null,
+        seed: seed.value || null,
+        token: tokenInput.value || null
+    }}, function() {
+        console.log("configuration setting saved locally")
+    });
+    popupWindow.classList.add("hidden")
 })
 
 // A function that counts seconda 
