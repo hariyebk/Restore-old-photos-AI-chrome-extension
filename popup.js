@@ -5,6 +5,7 @@ const width = document.getElementById("width")
 const height = document.getElementById("height")
 const steps = document.getElementById("steps")
 const seed = document.getElementById("seed")
+const strength = document.getElementById("strength")
 const negativePrompt = document.getElementById("negative_prompt")
 const UploadButton = document.getElementById("uploadBtn")
 const settingBtn = document.getElementById("setting")
@@ -65,23 +66,30 @@ UploadButton.addEventListener("click", async () => {
     // Disable the file fields and the stars
     FileInput.disabled = true
     promptInput.disabled = true
-    tokenInput.disabled = true
     settingBtn.disabled = true
+    negativePrompt.disabled = true
 
     if(!starContainer.classList.contains("hidden")){
         starContainer.classList.add("hidden")
     }
-    // store the prompt and token in the local storage
+    // store the prompt and negative prompt in the local storage
     chrome.storage.local.set({ userData: {
         prompt,
-        token: tokenInput.value
+        negativePrompt: negativePrompt.value || "",
     }}, function() {
-        console.log('user data saved locally');
+        console.log('prompt saved locally');
     });
-
+    
     const form = new FormData()
     form.set("file", files[0])
     form.set("prompt", prompt)
+    form.set("negative_prompt", negativePrompt.value ? negativePrompt.value : "")
+    form.set("width", width.value)
+    form.set("height", height.value)
+    form.set("steps", steps.value)
+    form.set("seed", seed.value)
+    form.set("strength", strength.value)
+    form.set("token", tokenInput.value)
 
     try{
         if(tokenInput.value){
@@ -155,6 +163,8 @@ UploadButton.addEventListener("click", async () => {
         <p class="text-red-500 text-sm font-semibold mt-3"> ${error.message ? error.message : "something went wrong"} </p>
         `
         stopTimer()
+        // hide the timer in case of errors
+        timer.classList.add("hidden")
         console.error(error)
     }
     finally{
@@ -164,6 +174,7 @@ UploadButton.addEventListener("click", async () => {
         tokenInput.disabled = false
         UploadButton.disabled = false
         settingBtn.disabled = false
+        negativePrompt.disabled = false
         // return the upload button state to the original
         UploadButton.innerHTML = `
         <p class="text-base text-black font-semibold"> Upload </p>
@@ -237,9 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (result.userData) {
             const data = result.userData
             promptInput.value = data.prompt
-            if(data.token){
-                tokenInput.value = data.token
-            }
+            negativePrompt.value = data.negativePrompt
         } 
     });
     chrome.storage.local.get("rating", function(result){
@@ -255,11 +264,15 @@ document.addEventListener('DOMContentLoaded', function() {
 settingBtn.addEventListener("click", () => {
     popupWindow.classList.remove("hidden")
     chrome.storage.local.get('config', function(result) {
-        width.value = result.config.width,
-        height.value = result.config.height,
-        steps.value = result.config.steps,
-        seed.value = result.config.seed,
-        tokenInput.value = result.config.token
+        if(result.config){
+            width.value = result.config.width,
+            height.value = result.config.height,
+            steps.value = result.config.steps,
+            seed.value = result.config.seed,
+            strength.value = result.config.strength || "4.5",
+            tokenInput.value = result.config.token
+        }
+        else return
     });
 })
 
@@ -271,10 +284,11 @@ closBtn.addEventListener("click", () => {
 // save the API token to the local storage
 saveBtn.addEventListener("click", () => {
     chrome.storage.local.set({ config: {
-        width: width.value || null,
-        height: height.value || null,
-        steps: steps.value || null,
-        seed: seed.value || null,
+        width: width.value ? width.value : "1024",
+        height: height.value ? height.value : "1024",
+        steps: steps.value ? steps.value : "20",
+        seed: seed.value ? seed.value : "42",
+        strength: strength.value ? strength.value : "4.5",
         token: tokenInput.value || null
     }}, function() {
         console.log("configuration setting saved locally")
