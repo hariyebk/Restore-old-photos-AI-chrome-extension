@@ -18,9 +18,12 @@ const promptError = document.getElementById("prompt-message")
 const operationError = document.getElementById("operation-error")
 const starContainer = document.getElementById("star-widget")
 const stars = document.querySelectorAll(".star")
-const REPLICATE_API_URI = "https://api.replicate.com/v1/predictions"
+const title = document.getElementById("title")
+const previewContainer = document.getElementById("preview")
+const closeRedBtn = document.getElementById("closered")
+const downloadBtn = document.getElementById("download")
 
-let files, seconds = 0, timerInterval = null
+let files, seconds = 0, timerInterval = null , generatedImage = ''
 
 FileInput.addEventListener("change", (event) => {
     files = event.target.files
@@ -72,6 +75,7 @@ UploadButton.addEventListener("click", async () => {
     promptInput.disabled = true
     settingBtn.disabled = true
     negativePrompt.disabled = true
+    FileLabel.classList.add("hover:cursor-not-allowed")
 
     if(!starContainer.classList.contains("hidden")){
         starContainer.classList.add("hidden")
@@ -157,9 +161,31 @@ UploadButton.addEventListener("click", async () => {
         const {outputs} = data2
         // retrieve the first result from the outputs
         const imageURL = outputs?.at(0).replaceAll("'", "")
+        generatedImage = imageURL
         stopTimer()
         // open it in a new tab
-        window.open(imageURL, "_blank");
+        // window.open(imageURL, "_blank");
+
+        // create an image element
+        const img = document.createElement('img')
+        const div = document.createElement('div')
+        img.src = imageURL
+        img.alt = 'generated sticker'
+        img.width = 300
+        img.height = 150
+        img.classList.add("object-contain")
+        
+        div.innerHTML = `
+            <a href="${imageURL}" target="_blank" class="hover:cursor-pointer">
+                ${img.outerHTML}
+            </a>
+        `
+        // append the preview container
+        previewContainer.appendChild(div)
+        // hide the title
+        title.classList.add("hidden")
+        // show the preview section
+        previewContainer.classList.remove("hidden")
     }
     catch(error){
         // display the error
@@ -179,6 +205,7 @@ UploadButton.addEventListener("click", async () => {
         UploadButton.disabled = false
         settingBtn.disabled = false
         negativePrompt.disabled = false
+        FileLabel.classList.remove("hover:cursor-not-allowed")
         // return the upload button state to the original
         UploadButton.innerHTML = `
         <p class="text-base text-black font-semibold"> Upload </p>
@@ -318,6 +345,27 @@ saveBtn.addEventListener("click", () => {
         console.log("configuration setting saved locally")
     });
     popupWindow.classList.add("hidden")
+})
+
+// close the preview section
+closeRedBtn.addEventListener("click", () => {
+    previewContainer.classList.add("hidden")
+    title.classList.remove("hidden")
+})
+
+// download the generated image
+downloadBtn.addEventListener("click", () => {
+    chrome.downloads.download({
+        url: generatedImage,
+        filename: 'sticker.png'
+    }, (downloadItem) => {
+        if (chrome.runtime.lastError) {
+            console.error('Error downloading the image:', chrome.runtime.lastError.message);
+        } 
+        else {
+            console.log('Image download started:', downloadItem);
+        }
+    });
 })
 
 // A function that counts seconda 
