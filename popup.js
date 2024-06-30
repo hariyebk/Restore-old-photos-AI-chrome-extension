@@ -60,16 +60,6 @@ UploadButton.addEventListener("click", async () => {
     UploadButton.disabled = true
     // remove the content inside the buton
     UploadButton.innerHTML = ''
-    // Add a spinner to notify the user that we are processing the request
-    UploadButton.innerHTML = `
-        <div class="flex justify-center gap-2">
-            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <p class="text-black text-base font-semibold"> uploading... </p>
-        </div>
-    `
     // Disable the file fields and the stars
     FileInput.disabled = true
     promptInput.disabled = true
@@ -97,14 +87,24 @@ UploadButton.addEventListener("click", async () => {
     form.set("steps", steps.value)
     form.set("seed", seed.value)
     form.set("strength", strength.value)
-    form.set("token", tokenInput.value)
+    form.set("token", tokenInput.value.trim())
 
     try{
         if(tokenInput.value){
+            const token = tokenInput.value.trim()
+            UploadButton.innerHTML = `
+            <div class="flex justify-center gap-2">
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="text-black text-base font-semibold"> verifying token... </p>
+            </div>
+            `
             const response = await fetch("https://yegarabet.vercel.app/api/verifyToken", {
                 method: "POST",
                 body: JSON.stringify({
-                    token: tokenInput.value || null
+                    token: token || null
                 })
             })
             const data = await response.json()
@@ -112,6 +112,16 @@ UploadButton.addEventListener("click", async () => {
                 throw new Error(data.error)
             }
         }
+         // Add a spinner to notify the user that we are processing the request
+        UploadButton.innerHTML = `
+        <div class="flex justify-center gap-2">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="text-black text-base font-semibold"> uploading... </p>
+        </div>
+        `
         // Create a post request to the proxy server by sending the image
         const response1 =  await fetch("https://yegarabet.vercel.app/api/create-prediction", {
             method: "POST",
@@ -210,8 +220,13 @@ UploadButton.addEventListener("click", async () => {
         UploadButton.innerHTML = `
         <p class="text-base text-black font-semibold"> Upload </p>
         `
-        // show the rating again
-        starContainer.classList.remove('hidden')
+        // Show the rating If the user hasn't rated before.
+        chrome.storage.local.get("rating", function(result){
+            if(!result.rating){
+                starContainer.classList.remove("hidden")
+            }
+            else return
+        })
     }
 })
 
