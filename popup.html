@@ -52,7 +52,10 @@
                     <input type="text" id="strength" value="4.5" class="w-[200px] p-2 text-sm rounded-md mt-3 focus-visible:outline-none text-black" />
                 </div>
                 <div  class="flex flex-col items-start">
-                    <label class="text-base text-primary"> Api token </label>
+                    <div class="flex items-center gap-2">
+                        <label class="text-base text-primary"> Your API </label>
+                        <a href=" https://replicate.com/account/api-tokens" target="_blank" class="text-base text-blue-500"> ( Replicate ) </a>
+                    </div>
                     <input type="text" id="token" placeholder="Your replicate api key" class="w-[200px] p-2 text-sm rounded-md mt-3 focus-visible:outline-none text-black" />
                 </div>
                 <button id="save" class="bg-button w-[200px] mt-5 px-4 py-2 rounded-md focus-visible:outline-none text-base text-black font-semibold">
@@ -63,12 +66,15 @@
     </div>
     <div class="flex flex-col items-center mt-3">
         <h2 class="text-2xl text-primary"> Harun Face to Sticker </h2>
-        <input type="file" accept=".png, .jpeg, .jpg" id="fileInput" class="text-base text-primary ml-20 mt-10 disabled:cursor-not-allowed" />
+        <div class="mt-6 w-full flex justify-start">
+            <label for="fileInput" id="fileLabel" class="bg-primary px-4 py-2 text-base text-black rounded-md hover:cursor-pointer ml-20"> Select Image </label>
+            <input id="fileInput" type="file" class="hidden">
+        </div>
         <label class="text-base text-primary w-[225px] flex justify-start mt-6"> Prompt </label>
         <input type="text" id="prompt" placeholder="Ex. cyborg vampire, clown ..." class="w-[225px] mt-3 bg-primary rounded-md px-3 py-2.5 text-sm text-black focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-secondary" />
         <span id="prompt-message" class="w-[225px] flex justify-start mt-3"> </span>
         <label class="text-base text-primary w-[225px] flex justify-start mt-3">  Negative prompt (optional) </label>
-        <input type="text" id="negative_prompt" placeholder="Things you don't want in the image" class="w-[225px] mt-3 bg-primary rounded-md px-3 py-2.5 text-sm text-black focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-secondary" />
+        <input type="text" id="negative_prompt" placeholder="things you don't want to see" class="w-[225px] mt-3 bg-primary rounded-md px-3 py-2.5 text-sm text-black focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-secondary" />
         <span id="operation-error" class="w-[225px] flex justify-start mt-3"> </span>
         <div id="timer" class="mt-2"></div>
         <button id="uploadBtn" disabled class="bg-button w-[225px] mt-7 px-4 py-2.5 rounded-md focus-visible:outline-none disabled:cursor-not-allowed">

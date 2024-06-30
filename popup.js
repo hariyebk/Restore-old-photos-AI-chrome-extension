@@ -1,4 +1,5 @@
 const FileInput = document.getElementById("fileInput")
+const FileLabel = document.getElementById("fileLabel")
 const promptInput = document.getElementById("prompt")
 const tokenInput = document.getElementById("token")
 const width = document.getElementById("width")
@@ -24,10 +25,13 @@ let files, seconds = 0, timerInterval = null
 FileInput.addEventListener("change", (event) => {
     files = event.target.files
     if(files.length > 0){
+        // change the name of the labe
+        FileLabel.textContent = files[0].name
         // Enable the button for upload
         UploadButton.disabled = false
         // clear if there were any errors on the previous result
         operationError.innerHTML = ``
+        storeImage(files[0])
     }
 })
 
@@ -256,7 +260,27 @@ document.addEventListener('DOMContentLoaded', function() {
             // hide the rating section from the DOM
             starContainer.classList.add("hidden")
         }
-        else return 
+        else{
+            console.log("No previous rating found")
+        }
+    })
+    chrome.storage.local.get('image', function(result){
+        if(result.image){
+            // loading the stored image to the input field
+            FileLabel.textContent = result.image.name
+            const base64Data = result.image.value;
+            // extracting the MIME type from Base64 string
+            const mimeType = base64Data.match(/^data:(.*?);base64,/)[1]
+            const imageBlob = base64ToBlob(base64Data, mimeType);
+            const imageFile = blobToFile(imageBlob, result.imageName);
+            const returnedFileArray = setConvertedFileToVariable(imageFile)
+            if(returnedFileArray.length > 0){
+                UploadButton.disabled = false
+            }
+        }
+        else{
+            console.log("No previous rating found")
+        }
     })
 }) 
 
@@ -307,4 +331,53 @@ function startTimer(){
 // A function that stops the time
 function stopTimer(){
     clearInterval(timerInterval)
+}
+
+// A function that stores the image in local storage as Base64 string
+function storeImage(file) {
+    const reader = new FileReader();
+    // reads and coverts the image data as Base64 string
+    reader.onload = function(event) {
+        const base64string = event.target.result;
+        chrome.storage.local.set({image: {
+            value: base64string,
+            name: file.name
+        }}, function() {
+            if (chrome.runtime.lastError) {
+                console.error('Error storing image:', chrome.runtime.lastError);
+            } else {
+                console.log('Image stored successfully');
+            }
+        });
+    };
+    
+    reader.onerror = function(error) {
+        console.error('Error reading file:', error);
+    };
+    
+    reader.readAsDataURL(file);
+}
+
+// A function that converts a Base64 data to blob data
+function base64ToBlob(base64, mimeType) {
+    // decoding the Base64 string
+    const byteCharacters = atob(base64.split(',')[1])
+    const byteNumbers = new Array(byteCharacters.length)
+    
+    for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i)
+    }
+    
+    const byteArray = new Uint8Array(byteNumbers)
+    return new Blob([byteArray], { type: mimeType })
+}
+
+// A function that converts blob data into a file
+function blobToFile(blob, fileName) {
+    return new File([blob], fileName, { type: blob.type, lastModified: Date.now() });
+}
+
+function setConvertedFileToVariable(image){
+    files = [image]
+    return files
 }
