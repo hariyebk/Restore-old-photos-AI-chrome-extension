@@ -19,8 +19,13 @@ const stars = document.querySelectorAll(".star")
 const previewContainer = document.getElementById("preview")
 const closeRedBtn = document.getElementById("closered")
 const downloadBtn = document.getElementById("download")
+const container = document.querySelector(".container")
+const imageContainer = document.getElementById('imageContainer')
+const before = document.getElementById("before")
+const after = document.getElementById("after")
 
-let files, seconds = 0, timerInterval = null , generatedImage = ''
+
+let files, seconds = 0, timerInterval = null , generatedImage = '', sliderP
 
 
 dropZone.addEventListener("click", () => {
@@ -62,17 +67,17 @@ UploadButton.addEventListener("click", async () => {
     const fidelity = fidelityInput.value
     if(fidelity){
         const fidelityNumber = parseInt(fidelity)
-        const correctNumber = 0 <= fidelityNumber <= 1
-        if(!correctNumber){
+        if(fidelityNumber > 1 || fidelityNumber < 0){
             fidelityError.innerHTML= `
                 <p class="text-red-500 text-sm font-semibold"> invalid number </p>
             `
             return
         }
-    }
-    else{
-        // Clear if there is no error
-        fidelityError.innerHTML = ``
+        else{
+            // Clear if there is no error
+            fidelityError.innerHTML = ``
+
+        }
     }
     startTimer()
     // clear if there were any previous errors.
@@ -164,7 +169,7 @@ UploadButton.addEventListener("click", async () => {
         // A function to delay the execution because we need to Wait for the model to finish processing the image, then making a request to get the results
         const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
         // wait for 15 seconds 
-        await delay(15000)
+        await delay(40000)
         UploadButton.innerHTML = `
         <div class="flex justify-center gap-2">
             <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -207,9 +212,17 @@ UploadButton.addEventListener("click", async () => {
         img.classList.add("object-contain")
         
         div.innerHTML = `
-            <a href="${imageURL}" target="_blank" class="hover:cursor-pointer">
-                ${img.outerHTML}
-            </a>
+            <div class="grid place-content-center relative overflow-hidden">
+                <div class="image-container">
+                    <img src=${files[0]} alt="original-image" class="" />
+                    ${img.outerHTML}
+                </div>
+                <input type="range" min="0" max="100" value="50" class="" aria-label="image comparison slider" />
+                <div class="slider-line"> </div>
+                <div class="slider-button" aria-hidden="true"> 
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#dfdfd7" viewBox="0 0 256 256"><path d="M136,40V216a8,8,0,0,1-16,0V40a8,8,0,0,1,16,0ZM96,120H35.31l18.35-18.34A8,8,0,0,0,42.34,90.34l-32,32a8,8,0,0,0,0,11.32l32,32a8,8,0,0,0,11.32-11.32L35.31,136H96a8,8,0,0,0,0-16Zm149.66,2.34-32-32a8,8,0,0,0-11.32,11.32L220.69,120H160a8,8,0,0,0,0,16h60.69l-18.35,18.34a8,8,0,0,0,11.32,11.32l32-32A8,8,0,0,0,245.66,122.34Z"></path></svg>
+                </div>
+            </div>
         `
         // append the preview container
         previewContainer.appendChild(div)
@@ -461,3 +474,35 @@ function handleFile(files){
     operationError.innerHTML = ``
     dropZone.textContent = files[0].name
 }
+
+// listening for the sliding event
+document.querySelector(".slider").addEventListener("input", (e) => {
+    const position = e.target.value
+    container.style.setProperty('--position', `${position}%`)
+    if(parseInt(position) <= 10){
+        if(after.classList.contains('hidden')){
+            after.classList.remove('hidden')
+        }
+        if(!before.classList.contains('hidden')){
+            before.classList.add('hidden')
+        }
+    }
+    if(parseInt(position) >= 90){
+        if(before.classList.contains('hidden')){
+            before.classList.remove('hidden')
+        }
+        if(!after.classList.contains('hidden')){
+            after.classList.add('hidden')
+        }
+    }
+})
+
+previewContainer.addEventListener('mouseenter', () => {
+    before.classList.add('hidden')
+    after.classList.add('hidden')
+})
+
+previewContainer.addEventListener('mouseleave', () => {
+    before.classList.remove('hidden')
+    after.classList.remove('hidden')
+})

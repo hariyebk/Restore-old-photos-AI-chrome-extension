@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Face to Sticker",
+    "name": "Restore old photos",
     "version": "1.0",
-    "description": "A minimalistic Ai powered sticker maker",
+    "description": "Restore old, damaged, or low-quality photos. With just a few clicks.",
     "icons": {
         "128": "128.png"
     },
