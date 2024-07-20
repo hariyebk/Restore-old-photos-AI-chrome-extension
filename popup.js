@@ -1,59 +1,80 @@
 const FileInput = document.getElementById("fileInput")
-const FileLabel = document.getElementById("fileLabel")
-const promptInput = document.getElementById("prompt")
+const dropZone = document.getElementById("dropzone")
+const dragAndDropContainer = document.getElementById("draganddrop")
 const tokenInput = document.getElementById("token")
-const width = document.getElementById("width")
-const height = document.getElementById("height")
-const steps = document.getElementById("steps")
-const seed = document.getElementById("seed")
-const strength = document.getElementById("strength")
-const negativePrompt = document.getElementById("negative_prompt")
+const enhance = document.getElementById("enhance")
+const upsample = document.getElementById("upsample")
+const fidelityInput = document.getElementById("fidelity")
+const upscaleInput = document.getElementById("upscale")
 const UploadButton = document.getElementById("uploadBtn")
 const settingBtn = document.getElementById("setting")
 const closBtn = document.getElementById("close")
 const saveBtn = document.getElementById("save")
 const timer = document.getElementById("timer")
 const popupWindow = document.getElementById("popup")
-const promptError = document.getElementById("prompt-message")
+const fidelityError = document.getElementById("fidelity-message")
 const operationError = document.getElementById("operation-error")
 const starContainer = document.getElementById("star-widget")
 const stars = document.querySelectorAll(".star")
-const title = document.getElementById("title")
 const previewContainer = document.getElementById("preview")
 const closeRedBtn = document.getElementById("closered")
 const downloadBtn = document.getElementById("download")
 
 let files, seconds = 0, timerInterval = null , generatedImage = ''
 
+
+dropZone.addEventListener("click", () => {
+    FileInput.click()
+})
+
+dragAndDropContainer.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+    dragAndDropContainer.classList.remove('border-button')
+    dragAndDropContainer.classList.add('border-green-600')
+})
+
+dragAndDropContainer.addEventListener('dragleave', () => {
+    dragAndDropContainer.classList.remove('border-green-600');
+    dragAndDropContainer.classList.add('border-button')
+})
+
+dragAndDropContainer.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dragAndDropContainer.classList.remove('border-green-600');
+    dragAndDropContainer.classList.add('border-button')
+    const droppedFiles = e.dataTransfer.files;
+    files = droppedFiles
+    handleFile(droppedFiles)
+});
+
 FileInput.addEventListener("change", (event) => {
     files = event.target.files
     if(files.length > 0){
-        // change the name of the labe
-        FileLabel.textContent = files[0].name
-        // Enable the button for upload
-        UploadButton.disabled = false
-        // clear if there were any errors on the previous result
-        operationError.innerHTML = ``
-        storeImage(files[0])
+        handleFile(files)
     }
 })
 
 UploadButton.addEventListener("click", async () => {
-    startTimer()
     // check again if the image has been uploaded and the button is not disabled
     if(files.length === 0 || UploadButton.getAttribute("disabled")) return 
-    // check if prompt is provided
-    const prompt = promptInput.value
-    if(!prompt){
-        promptError.innerHTML= `
-            <p class="text-red-500 text-sm font-semibold"> prompt is required </p>
-        `
-        return
+    // check if the fidelity prompt is provided and is a correct number
+    const fidelity = fidelityInput.value
+    if(fidelity){
+        const fidelityNumber = parseInt(fidelity)
+        const correctNumber = 0 <= fidelityNumber <= 1
+        if(!correctNumber){
+            fidelityError.innerHTML= `
+                <p class="text-red-500 text-sm font-semibold"> invalid number </p>
+            `
+            return
+        }
     }
     else{
-        // Clear if there is a prompt error
-        promptError.innerHTML = ``
+        // Clear if there is no error
+        fidelityError.innerHTML = ``
     }
+    startTimer()
     // clear if there were any previous errors.
     operationError.innerHTML = ``
     // disable the upload button
@@ -62,31 +83,28 @@ UploadButton.addEventListener("click", async () => {
     UploadButton.innerHTML = ''
     // Disable the file fields and the stars
     FileInput.disabled = true
-    promptInput.disabled = true
+    fidelityInput.disabled = true
+    upscaleInput.disabled = true
     settingBtn.disabled = true
-    negativePrompt.disabled = true
-    FileLabel.classList.add("hover:cursor-not-allowed")
+    dropZone.disabled = true
 
     if(!starContainer.classList.contains("hidden")){
         starContainer.classList.add("hidden")
     }
-    // store the prompt and negative prompt in the local storage
+    // store the fidelity and upscale value in the local storage
     chrome.storage.local.set({ userData: {
-        prompt,
-        negativePrompt: negativePrompt.value || "",
+        fidelity,
+        upscale: upscaleInput.value,
     }}, function() {
-        console.log('prompt saved locally');
+        console.log('config numbers saved locally');
     });
     
     const form = new FormData()
     form.set("file", files[0])
-    form.set("prompt", prompt)
-    form.set("negative_prompt", negativePrompt.value ? negativePrompt.value : "")
-    form.set("width", width.value)
-    form.set("height", height.value)
-    form.set("steps", steps.value)
-    form.set("seed", seed.value)
-    form.set("strength", strength.value)
+    form.set("fidelity", fidelity)
+    form.set("upscale", upscaleInput.value)
+    form.set("enhance", enhance.value)
+    form.set("upsample", upsample.value)
     form.set("token", tokenInput.value.trim())
 
     try{
@@ -101,7 +119,7 @@ UploadButton.addEventListener("click", async () => {
                 <p class="text-black text-base font-semibold"> verifying token... </p>
             </div>
             `
-            const response = await fetch("https://yegarabet.vercel.app/api/verifyToken", {
+            const response = await fetch("http://localhost:3000/api/restore/verifyToken", {
                 method: "POST",
                 body: JSON.stringify({
                     token: token || null
@@ -123,12 +141,13 @@ UploadButton.addEventListener("click", async () => {
         </div>
         `
         // Create a post request to the proxy server by sending the image
-        const response1 =  await fetch("https://yegarabet.vercel.app/api/create-prediction", {
+        const response1 =  await fetch("http://localhost:3000/api/restore/create-prediction", {
             method: "POST",
             body: form
         })
         const data1 = await response1.json()
         if(data1.error){
+            console.log(data1.error)
             throw new Error(data1.error)
         }
         UploadButton.innerHTML = `
@@ -144,8 +163,8 @@ UploadButton.addEventListener("click", async () => {
         const {predictionId} = data1
         // A function to delay the execution because we need to Wait for the model to finish processing the image, then making a request to get the results
         const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-        // wait for 85 seconds 
-        await delay(85000)
+        // wait for 15 seconds 
+        await delay(15000)
         UploadButton.innerHTML = `
         <div class="flex justify-center gap-2">
             <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -156,7 +175,7 @@ UploadButton.addEventListener("click", async () => {
         </div>
     `
         // make a get request to the proxy server again
-        const response2 = await fetch("https://yegarabet.vercel.app/api/get-prediction", {
+        const response2 = await fetch("http://localhost:3000/api/restore/get-prediction", {
             method: "POST",
             body: JSON.stringify({
                 predictionId,
@@ -168,9 +187,11 @@ UploadButton.addEventListener("click", async () => {
         if(data2.error){
             throw new Error(data2.error)
         }
-        const {outputs} = data2
+        const {output} = data2
+        console.log(`output`, output)
         // retrieve the first result from the outputs
-        const imageURL = outputs?.at(0).replaceAll("'", "")
+        const imageURL = output.replaceAll("'", "")
+        console.log(`result`, imageURL )
         generatedImage = imageURL
         stopTimer()
         // open it in a new tab
@@ -180,7 +201,7 @@ UploadButton.addEventListener("click", async () => {
         const img = document.createElement('img')
         const div = document.createElement('div')
         img.src = imageURL
-        img.alt = 'generated sticker'
+        img.alt = 'restored image'
         img.width = 300
         img.height = 150
         img.classList.add("object-contain")
@@ -192,8 +213,6 @@ UploadButton.addEventListener("click", async () => {
         `
         // append the preview container
         previewContainer.appendChild(div)
-        // hide the title
-        title.classList.add("hidden")
         // show the preview section
         previewContainer.classList.remove("hidden")
     }
@@ -203,22 +222,20 @@ UploadButton.addEventListener("click", async () => {
         <p class="text-red-500 text-sm font-semibold mt-3"> ${error.message ? error.message : "something went wrong"} </p>
         `
         stopTimer()
-        // hide the timer in case of errors
-        timer.classList.add("hidden")
-        console.error(error)
+        console.log(error)
     }
     finally{
         // Enable the input fields
         FileInput.disabled = false
-        promptInput.disabled = false
+        fidelityInput.disabled = false
+        upscaleInput.disabled = false
         tokenInput.disabled = false
         UploadButton.disabled = false
         settingBtn.disabled = false
-        negativePrompt.disabled = false
-        FileLabel.classList.remove("hover:cursor-not-allowed")
+        dropZone.disabled = false
         // return the upload button state to the original
         UploadButton.innerHTML = `
-        <p class="text-base text-black font-semibold"> Upload </p>
+        <p class="text-base text-black font-semibold"> Start </p>
         `
         // Show the rating If the user hasn't rated before.
         chrome.storage.local.get("rating", function(result){
@@ -288,13 +305,13 @@ function resetStars() {
     });
 }
 
-// Litsening for the user to open our extension , then we will load the data from the storage to prompt and token of the last.
+// Litsening for the user to open our extension , then we will load the data from the storage.
 document.addEventListener('DOMContentLoaded', function() {
     chrome.storage.local.get('userData', function(result) {
         if (result.userData) {
             const data = result.userData
-            promptInput.value = data.prompt
-            negativePrompt.value = data.negativePrompt
+            fidelityInput.value = data.fidelity
+            upscaleInput.value = data.upscale
         } 
     });
     chrome.storage.local.get("rating", function(result){
@@ -309,19 +326,16 @@ document.addEventListener('DOMContentLoaded', function() {
     chrome.storage.local.get('image', function(result){
         if(result.image){
             // loading the stored image to the input field
-            FileLabel.textContent = result.image.name
             const base64Data = result.image.value;
             // extracting the MIME type from Base64 string
             const mimeType = base64Data.match(/^data:(.*?);base64,/)[1]
             const imageBlob = base64ToBlob(base64Data, mimeType);
-            const imageFile = blobToFile(imageBlob, result.imageName);
+            const imageFile = blobToFile(imageBlob, result.image.name);
             const returnedFileArray = setConvertedFileToVariable(imageFile)
             if(returnedFileArray.length > 0){
                 UploadButton.disabled = false
+                dropZone.textContent = returnedFileArray[0].name
             }
-        }
-        else{
-            console.log("No previous rating found")
         }
     })
 }) 
@@ -331,12 +345,8 @@ settingBtn.addEventListener("click", () => {
     popupWindow.classList.remove("hidden")
     chrome.storage.local.get('config', function(result) {
         if(result.config){
-            width.value = result.config.width,
-            height.value = result.config.height,
-            steps.value = result.config.steps,
-            seed.value = result.config.seed,
-            strength.value = result.config.strength || "4.5",
-            tokenInput.value = result.config.token
+            enhance.value = result.config.enhance || "true"
+            upsample.value = result.config.upsample || "true"
         }
         else return
     });
@@ -349,13 +359,12 @@ closBtn.addEventListener("click", () => {
 
 // save the API token to the local storage
 saveBtn.addEventListener("click", () => {
+    console.log(`enhanceValue`, enhance.value)
+    console.log(`upsampleValue`, upsample.value)
+
     chrome.storage.local.set({ config: {
-        width: width.value ? width.value : "1024",
-        height: height.value ? height.value : "1024",
-        steps: steps.value ? steps.value : "20",
-        seed: seed.value ? seed.value : "42",
-        strength: strength.value ? strength.value : "4.5",
-        token: tokenInput.value || null
+        enhance: enhance.value ,
+        upsample: upsample.value
     }}, function() {
         console.log("configuration setting saved locally")
     });
@@ -365,14 +374,13 @@ saveBtn.addEventListener("click", () => {
 // close the preview section
 closeRedBtn.addEventListener("click", () => {
     previewContainer.classList.add("hidden")
-    title.classList.remove("hidden")
 })
 
-// download the generated image
+// download the restored image
 downloadBtn.addEventListener("click", () => {
     chrome.downloads.download({
         url: generatedImage,
-        filename: 'sticker.png'
+        filename: 'restored-image.png'
     }, (downloadItem) => {
         if (chrome.runtime.lastError) {
             console.error('Error downloading the image:', chrome.runtime.lastError.message);
@@ -394,6 +402,7 @@ function startTimer(){
 // A function that stops the time
 function stopTimer(){
     clearInterval(timerInterval)
+    timer.classList.add('hidden')
 }
 
 // A function that stores the image in local storage as Base64 string
@@ -443,4 +452,12 @@ function blobToFile(blob, fileName) {
 function setConvertedFileToVariable(image){
     files = [image]
     return files
+}
+
+function handleFile(files){
+    storeImage(files[0])
+    UploadButton.disabled = false
+    // clear if there were any errors on the previous result
+    operationError.innerHTML = ``
+    dropZone.textContent = files[0].name
 }

@@ -1,34 +1,36 @@
-**Face to Sticker: AI-Powered Chrome Extension**
-=============================================
+**Description**
 
-**Convert any face into a sticker with just a prompt!**
+This Chrome extension uses the powerful CodeFormer model on replicate as it's backend to restore old, damaged, or low-quality photos. With just a few clicks, you can bring new life to cherished memories and make them look like they were taken yesterday.
 
-FaceSticker is a Chrome extension that uses AI to transform any face into a sticker based on your desired prompt. With the power of InsightFace and AntelopeV2, the same technology used by InstantID, this extension brings a new level of creativity and fun to your online interactions.
+**Features**
 
-**How it works**
-
-1. Enter a prompt, such as "cartoon character" or "anime style".
-2. Enter an API token for replicate (optional).
-3. Click upload. then wait patiently untill it opens a new tab in your browser to display the result
-
-**Technical Details**
-
-This extension utilizes the following technologies:
-
-* **InsightFace**: A state-of-the-art face recognition and analysis framework.
-* **AntelopeV2**: A powerful AI model used by InstantID for face verification and identification.
+* Restore old photos with a single click
+* Supports various image formats (JPEG, PNG, etc.)
+* Easy to use: simply click the extension icon, drag and drop your image, and let the magic happen
+* Non-destructive editing: original image remains intact, and restored image is saved as a new file
 
 **Running FaceSticker Locally**
 
-1. **Clone the repository** by running `git clone https://github.com/hariyebk/Face-to-Sticker-AI-chrome-extension` in your terminal.
-2. **Navigate to the extension directory** by running `cd Face-to-Sticker-AI-chrome-extension` in your terminal.
+1. **Clone the repository** by running `git clone https://github.com/hariyebk/Restore-old-photos-AI-chrome-extension.git` in your terminal.
+2. **Navigate to the extension directory** by running `cd Restore-old-photos-AI-chrome-extension` in your terminal.
 3. **Enable developer mode** in Chrome by going to `chrome://extensions/` and toggling the switch in the top-right corner.
 4. **Load the extension** by clicking "Load unpacked" and selecting the `Face-to-Sticker-AI-chrome-extension` folder.
 5. **Pin the extension** to your Chrome toolbar by clicking the puzzle piece icon.
 
-**Troubleshooting**
+**CodeFormer Algorithm**
 
-* If you encounter any issues, please check the Chrome console for errors by pressing `Ctrl + Shift + J` (Windows/Linux) or `Cmd + Opt + J` (Mac).
-* For feedback and support, please email us at [Harun Bekri](mailto:harunbekri6@gmail.com).
+CodeFormer is a state-of-the-art face restoration algorithm that uses deep learning to repair and enhance facial features in old or low-quality photos. It's designed to work with a wide range of image types, including those with scratches, tears, or other forms of damage.
 
-**Get creative and have fun with FaceSticker!**
+**Limitations**
+
+* The extension may not work well with images that are severely damaged or have very low resolution.
+* Restoration results may vary depending on the quality and type of input image.
+
+**Support**
+
+If you encounter any issues or have feedback, please don't hesitate to reach out to us at [harunbekri6@gmail.com].
+
+
+**Changelog**
+
+* v1.0: Initial release

@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Harun Face to Sticker",
+    "name": "Face to Sticker",
     "version": "1.0",
     "description": "A minimalistic Ai powered sticker maker",
     "icons": {
