@@ -92,6 +92,7 @@ UploadButton.addEventListener("click", async () => {
     fidelityInput.disabled = true
     upscaleInput.disabled = true
     settingBtn.disabled = true
+    expand.disabled = true
     dropZone.disabled = true
 
     if(!starContainer.classList.contains("hidden")){
@@ -125,7 +126,7 @@ UploadButton.addEventListener("click", async () => {
                 <p class="text-black text-base font-semibold"> verifying token... </p>
             </div>
             `
-            const response = await fetch("http://localhost:3000/api/restore/verifyToken", {
+            const response = await fetch("https://yegarabet.vercel.app/api/restore/verifyToken", {
                 method: "POST",
                 body: JSON.stringify({
                     token: token || null
@@ -147,7 +148,7 @@ UploadButton.addEventListener("click", async () => {
         </div>
         `
         // Create a post request to the proxy server by sending the image
-        const response1 =  await fetch("http://localhost:3000/api/restore/create-prediction", {
+        const response1 =  await fetch("https://yegarabet.vercel.app/api/restore/create-prediction", {
             method: "POST",
             body: form
         })
@@ -170,7 +171,7 @@ UploadButton.addEventListener("click", async () => {
         // A function to delay the execution because we need to Wait for the model to finish processing the image, then making a request to get the results
         const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
         // wait for 15 seconds 
-        await delay(40000)
+        await delay(15000)
         UploadButton.innerHTML = `
         <div class="flex justify-center gap-2">
             <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -181,7 +182,7 @@ UploadButton.addEventListener("click", async () => {
         </div>
     `
         // make a get request to the proxy server again
-        const response2 = await fetch("http://localhost:3000/api/restore/get-prediction", {
+        const response2 = await fetch("https://yegarabet.vercel.app/api/restore/get-prediction", {
             method: "POST",
             body: JSON.stringify({
                 predictionId,
@@ -194,7 +195,6 @@ UploadButton.addEventListener("click", async () => {
             throw new Error(data2.error)
         }
         const {output} = data2
-        console.log(`output`, output)
         // retrieve the first result from the outputs
         const imageURL = output.replaceAll("'", "")
         console.log(`result`, imageURL )
@@ -203,32 +203,36 @@ UploadButton.addEventListener("click", async () => {
         // open it in a new tab
         // window.open(imageURL, "_blank");
 
-        // create an image element
-        const img = document.createElement('img')
-        const div = document.createElement('div')
-        img.src = imageURL
-        img.alt = 'restored image'
-        img.width = 300
-        img.height = 150
-        img.classList.add("object-contain")
-        
-        div.innerHTML = `
-            <div class="grid place-content-center relative overflow-hidden">
-                <div class="image-container">
-                    <img src=${files[0]} alt="original-image" class="" />
-                    ${img.outerHTML}
+        const reader = new FileReader()
+        reader.onload = function(e){
+            // create an image element
+            const newimg = document.createElement('img')
+            newimg.src = imageURL
+            newimg.alt = 'restored image'
+            newimg.className = "image-after slider-image object-contain"
+    
+            const oldimg = document.createElement('img')
+            oldimg.src = e.target.result
+            oldimg.alt = "original image"
+            oldimg.className = "image-before slider-image object-contain"
+    
+            const div = document.createElement('div')
+    
+            div.innerHTML = `
+                <div>
+                    ${oldimg.outerHTML}
+                    ${newimg.outerHTML}
                 </div>
-                <input type="range" min="0" max="100" value="50" class="" aria-label="image comparison slider" />
-                <div class="slider-line"> </div>
-                <div class="slider-button" aria-hidden="true"> 
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#dfdfd7" viewBox="0 0 256 256"><path d="M136,40V216a8,8,0,0,1-16,0V40a8,8,0,0,1,16,0ZM96,120H35.31l18.35-18.34A8,8,0,0,0,42.34,90.34l-32,32a8,8,0,0,0,0,11.32l32,32a8,8,0,0,0,11.32-11.32L35.31,136H96a8,8,0,0,0,0-16Zm149.66,2.34-32-32a8,8,0,0,0-11.32,11.32L220.69,120H160a8,8,0,0,0,0,16h60.69l-18.35,18.34a8,8,0,0,0,11.32,11.32l32-32A8,8,0,0,0,245.66,122.34Z"></path></svg>
-                </div>
-            </div>
-        `
-        // append the preview container
-        previewContainer.appendChild(div)
-        // show the preview section
-        previewContainer.classList.remove("hidden")
+            `
+            // append the image container
+            imageContainer.appendChild(div)
+            // hide the drag and drop container
+            dragAndDropContainer.classList.add("hidden")
+            // show the preview section
+            previewContainer.classList.remove("hidden")
+        }
+
+        reader.readAsDataURL(files[0])
     }
     catch(error){
         // display the error
@@ -246,6 +250,7 @@ UploadButton.addEventListener("click", async () => {
         tokenInput.disabled = false
         UploadButton.disabled = false
         settingBtn.disabled = false
+        expand.disabled = false
         dropZone.disabled = false
         // return the upload button state to the original
         UploadButton.innerHTML = `
@@ -363,6 +368,7 @@ settingBtn.addEventListener("click", () => {
         if(result.config){
             enhance.value = result.config.enhance || "true"
             upsample.value = result.config.upsample || "true"
+            tokenInput.value = result.config.token || ""
         }
         else return
     });
@@ -375,12 +381,10 @@ closBtn.addEventListener("click", () => {
 
 // save the API token to the local storage
 saveBtn.addEventListener("click", () => {
-    console.log(`enhanceValue`, enhance.value)
-    console.log(`upsampleValue`, upsample.value)
-
     chrome.storage.local.set({ config: {
         enhance: enhance.value ,
-        upsample: upsample.value
+        upsample: upsample.value,
+        token: tokenInput.value
     }}, function() {
         console.log("configuration setting saved locally")
     });
@@ -390,6 +394,7 @@ saveBtn.addEventListener("click", () => {
 // close the preview section
 closeRedBtn.addEventListener("click", () => {
     previewContainer.classList.add("hidden")
+    dragAndDropContainer.classList.remove("hidden")
 })
 
 // download the restored image

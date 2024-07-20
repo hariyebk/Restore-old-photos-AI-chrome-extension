@@ -87,7 +87,7 @@
                         <img src="./cog.png" alt="setting-icon"  class="w-7 h-7" />
                     </button>
                 </div>
-                <div id="popup" class="bg-background absolute top-0 right-0 w-[340px] h-[470px] pb-8 px-7 rounded-md border border-slate-700 hidden z-20">
+                <div id="popup" class="bg-background absolute top-0 right-0 w-[340px] h-[430px] pb-8 px-7 rounded-md border border-slate-700 hidden z-20">
                     <div class="mr-2 mt-4">
                         <button id="close" class="w-full flex justify-end">
                             <img src="./close.png" alt="close-icon" class="w-5 h-5" />
@@ -133,8 +133,6 @@
                     </div>
                     <div class="container">
                         <div id="imageContainer" class="max-w-[300px] max-h-[300px] aspect-square">
-                            <img src="./old.jpg" alt="before-image" class="image-before slider-image object-contain" />
-                            <img src="./new.png" alt="after-image" class="image-after slider-image object-contain" />
                         </div>
                         <input type="range" min="0" max="100" value="50" class="slider"/>
                         <div class="slider-line"></div>
@@ -163,7 +161,7 @@
                 <input type="text" id="upscale" value="2" class="w-[225px] mt-3 bg-primary rounded-md px-3 py-2.5 text-sm text-black focus-visible:outline-none disabled:cursor-not-allowed" />
                 <span id="operation-error" class="w-[225px] flex justify-start mt-3"> </span>
                 <div id="timer" class="mt-2"></div>
-                <button id="uploadBtn" disabled class="bg-button w-[225px] mt-3 px-4 py-2.5 rounded-md focus-visible:outline-none disabled:cursor-not-allowed">
+                <button id="uploadBtn" disabled class="bg-button w-[225px] mt-6 px-4 py-2.5 rounded-md focus-visible:outline-none disabled:cursor-not-allowed">
                     <p class="text-base text-black font-semibold"> Start </p>
                 </button>
                 <div id="star-widget" class="mt-7 flex flex-col items-start justify-start gap-5">
