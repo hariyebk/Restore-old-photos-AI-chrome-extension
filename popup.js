@@ -23,7 +23,7 @@ const container = document.querySelector(".container")
 const imageContainer = document.getElementById('imageContainer')
 const before = document.getElementById("before")
 const after = document.getElementById("after")
-
+const expand = document.getElementById("exapnd")
 
 let files, seconds = 0, timerInterval = null , generatedImage = '', sliderP
 
@@ -505,4 +505,11 @@ previewContainer.addEventListener('mouseenter', () => {
 previewContainer.addEventListener('mouseleave', () => {
     before.classList.remove('hidden')
     after.classList.remove('hidden')
+})
+
+expand.addEventListener("click", () => {
+    // send a message to open a new window
+    chrome.runtime.sendMessage({action: 'expand'});
+    // close the current popup
+    window.close()
 })
