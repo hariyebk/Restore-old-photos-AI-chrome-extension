@@ -10,7 +10,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'expand') {
         chrome.windows.create({
-            url: chrome.runtime.getURL('popup.html'),
+            url: chrome.runtime.getURL('newPopup.html'),
             type: 'popup',
             width: 800,
             height: 600

@@ -6,7 +6,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     <link href="./output.css" rel="stylesheet">
-    <title> Face to Sticker </title>
+    <title> Restore photos </title>
     <style>
         .star {
             color: #dfdfd7;
@@ -75,7 +75,7 @@
         }
     </style>
 </head>
-<body class="w-[390px] h-auto bg-background pt-4 pb-10 pr-4 rounded-sm">
+<body id="mainContainer" class="bg-background w-[390px] h-auto pt-4 pb-10 pr-4 rounded-sm ">
     <div class="relative">
         <div class="w-full flex justify-end gap-6 mb-4">
             <button id="expand">
@@ -85,7 +85,7 @@
                 <img src="./cog.png" alt="setting-icon"  class="w-7 h-7" />
             </button>
         </div>
-        <div id="popup" class="bg-background absolute top-0 right-0 w-[340px] h-[460px] overflow-y-scroll pb-8 px-7 rounded-md border border-slate-700 hidden z-20">
+        <div id="popup" class="bg-background absolute top-0 right-0 w-[340px] h-[470px] pb-8 px-7 rounded-md border border-slate-700 hidden z-20">
             <div class="mr-2 mt-4">
                 <button id="close" class="w-full flex justify-end">
                     <img src="./close.png" alt="close-icon" class="w-5 h-5" />

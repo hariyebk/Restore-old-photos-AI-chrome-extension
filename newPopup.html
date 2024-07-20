@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <link href="./output.css" rel="stylesheet">
+    <title> Restore photos </title>
+    <style>
+        .star {
+            color: #dfdfd7;
+        }
+        .star.hovered {
+            color: #EAB308;
+        }
+        .star.red {
+            color: red;
+        }
+        .container {
+            display: grid;
+            place-content: center;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            --position: 50%;
+        }
+        .slider {
+            position: absolute;
+            inset: 0;
+            cursor: pointer;
+            opacity: 0;
+        }
+        .slider-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: left;
+        }
+        .image-before {
+            position: absolute;
+            inset: 0;
+            width: var(--position);
+        }
+        .slider-line {
+            position: absolute;
+            inset: 0;
+            width: 0.2rem;
+            height: 100%;
+            background-color: #dfdfd7;
+            z-index: 10;
+            left: var(--position);
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+        .slider-button {
+            position: absolute;
+            background-color: #dfdfd7;
+            padding: .4rem;
+            border-radius: 100vw;
+            display: grid;
+            place-items: center;
+            top: 50%;
+            left: var(--position);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 10;
+        }
+        #before[style*="--position:0"]{
+            opacity: 0;
+        }
+        #after[style*="--position:100"]{
+            opacity: 0;
+        }
+    </style>
+</head>
+<body id="mainContainer" class="bg-background">
+    <main class="w-full h-full flex justify-center">
+        <section class="w-[390px] h-auto pt-4 pb-10 pr-4 rounded-sm ">
+            <div class="relative">
+                <div class="w-full flex justify-end gap-6 mb-4">
+                    <button id="expand" class="hidden">
+                        <img src="./expand.svg" alt="expand icon" class="w-6 h-5" />
+                    </button>
+                    <button id="setting" class="disabled:cursor-not-allowed w-10" >
+                        <img src="./cog.png" alt="setting-icon"  class="w-7 h-7" />
+                    </button>
+                </div>
+                <div id="popup" class="bg-background absolute top-0 right-0 w-[340px] h-[470px] pb-8 px-7 rounded-md border border-slate-700 hidden z-20">
+                    <div class="mr-2 mt-4">
+                        <button id="close" class="w-full flex justify-end">
+                            <img src="./close.png" alt="close-icon" class="w-5 h-5" />
+                        </button>
+                    </div>
+                    <div class="flex flex-col items-start gap-5 pl-8">
+                        <div class="flex flex-col items-start">
+                            <label class="text-base text-primary"> Background enhance </label>
+                            <select id="enhance" class="w-[200px] p-2 rounded-md focus-visible:outline-none mt-3">
+                                <option value="true"> True </option>
+                                <option value="false"> False </option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col items-start">
+                            <label class="text-base text-primary"> Face upsample </label>
+                            <select id="upsample" class="w-[200px] p-2 rounded-md focus-visible:outline-none mt-3">
+                                <option value="true"> True </option>
+                                <option value="false"> False </option>
+                            </select>
+                        </div>
+                        <div  class="flex flex-col items-start">
+                            <div class="flex items-center gap-2">
+                                <label class="text-base text-primary"> Your API </label>
+                                <a href=" https://replicate.com/account/api-tokens" target="_blank" class="text-base text-main"> ( Replicate ) </a>
+                            </div>
+                            <input type="text" id="token" placeholder="Your replicate api key" class="w-[200px] p-2 text-sm rounded-md mt-3 focus-visible:outline-none text-black" />
+                        </div>
+                        <button id="save" class="bg-button w-[200px] mt-5 px-4 py-2 rounded-md focus-visible:outline-none text-base text-black font-semibold">
+                            Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col items-center mt-7">
+                <div id="preview" class="w-[300px] h-[300px] hidden mt-10 mb-6 relative border border-dotted border-primary rounded-md">
+                    <div class="absolute right-0 -top-10 flex items-center gap-6 z-10 pr-7">
+                        <button id="download">
+                            <img src="./download.png" alt="close-icon" class="w-7 h-7" />
+                        </button>
+                        <button id="closered">
+                            <img src="./closered.png" alt="close-icon" class="w-4 h-4" />
+                        </button>
+                    </div>
+                    <div class="container">
+                        <div id="imageContainer" class="max-w-[300px] max-h-[300px] aspect-square">
+                            <img src="./old.jpg" alt="before-image" class="image-before slider-image object-contain" />
+                            <img src="./new.png" alt="after-image" class="image-after slider-image object-contain" />
+                        </div>
+                        <input type="range" min="0" max="100" value="50" class="slider"/>
+                        <div class="slider-line"></div>
+                        <div id="before" class="absolute left-0 top-[46%] bg-[#dfdfd7] p-1 before">
+                            <p class="text-xs text-black"> Before </p>
+                        </div>
+                        <div id="after" class="absolute right-0 top-[46%] bg-[#dfdfd7] p-1">
+                            <p class="text-xs text-black"> After </p>
+                        </div> 
+                        <div class="slider-button" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#000000" viewBox="0 0 256 256"><path d="M136,40V216a8,8,0,0,1-16,0V40a8,8,0,0,1,16,0ZM96,120H35.31l18.35-18.34A8,8,0,0,0,42.34,90.34l-32,32a8,8,0,0,0,0,11.32l32,32a8,8,0,0,0,11.32-11.32L35.31,136H96a8,8,0,0,0,0-16Zm149.66,2.34-32-32a8,8,0,0,0-11.32,11.32L220.69,120H160a8,8,0,0,0,0,16h60.69l-18.35,18.34a8,8,0,0,0,11.32,11.32l32-32A8,8,0,0,0,245.66,122.34Z"></path></svg>
+                        </div>
+                    </div>
+                </div>
+                <div id="draganddrop" draggable="true" class="w-[250px] h-[100px] border border-dashed border-button rounded-md flex items-center justify-center">
+                    <input type="file" id="fileInput" class="hidden" />
+                    <button id="dropzone" class="flex flex-col items-center text-sm gap-2 text-primary px-4 disabled:cursor-not-allowed">
+                        <p> Drag & Drop your face photo </p>
+                        <p> here or Click to Select </p>
+                    </button>
+                </div>
+                <label class="text-base text-primary w-[225px] flex justify-start mt-6"> Fidelity </label>
+                <input type="text" id="fidelity" value="0.1" class="w-[225px] mt-3 bg-primary rounded-md px-3 py-2.5 text-sm text-black focus-visible:outline-none disabled:cursor-not-allowed" />
+                <span id="fidelity-message" class="w-[225px] flex justify-start mt-3"> </span>
+                <label class="text-base text-primary w-[225px] flex justify-start mt-3"> Upscale </label>
+                <input type="text" id="upscale" value="2" class="w-[225px] mt-3 bg-primary rounded-md px-3 py-2.5 text-sm text-black focus-visible:outline-none disabled:cursor-not-allowed" />
+                <span id="operation-error" class="w-[225px] flex justify-start mt-3"> </span>
+                <div id="timer" class="mt-2"></div>
+                <button id="uploadBtn" disabled class="bg-button w-[225px] mt-3 px-4 py-2.5 rounded-md focus-visible:outline-none disabled:cursor-not-allowed">
+                    <p class="text-base text-black font-semibold"> Start </p>
+                </button>
+                <div id="star-widget" class="mt-7 flex flex-col items-start justify-start gap-5">
+                    <h3 class="text-2xl text-main font-semibold ml-2"> Give us a rating </h3>
+                    <div class="flex space-x-3 mt-2">
+                        <i class="star fa fa-star text-2xl cursor-pointer disabled:cursor-not-allowed"></i>
+                        <i class="star fa fa-star text-2xl cursor-pointer disabled:cursor-not-allowed"></i>
+                        <i class="star fa fa-star text-2xl cursor-pointer disabled:cursor-not-allowed"></i>
+                        <i class="star fa fa-star text-2xl cursor-pointer disabled:cursor-not-allowed"></i>
+                        <i class="star fa fa-star text-2xl cursor-pointer disabled:cursor-not-allowed"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="popup.js"></script>
+</body>
+</html>

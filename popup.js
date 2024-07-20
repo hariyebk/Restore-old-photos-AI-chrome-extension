@@ -23,7 +23,8 @@ const container = document.querySelector(".container")
 const imageContainer = document.getElementById('imageContainer')
 const before = document.getElementById("before")
 const after = document.getElementById("after")
-const expand = document.getElementById("exapnd")
+const expand = document.getElementById("expand")
+const mainContainer = document.getElementById("mainContainer")
 
 let files, seconds = 0, timerInterval = null , generatedImage = '', sliderP
 
@@ -298,6 +299,8 @@ stars.forEach((star, index) => {
             console.log('current rating saved locally')
         });
 
+        // hide the widget
+        starContainer.classList.add('hidden')
         if (currentRating >= 4) {
             window.open("https://www.google.com/", "_blank");
         } 
