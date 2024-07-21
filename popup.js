@@ -4,15 +4,12 @@ const dragAndDropContainer = document.getElementById("draganddrop")
 const tokenInput = document.getElementById("token")
 const enhance = document.getElementById("enhance")
 const upsample = document.getElementById("upsample")
-const fidelityInput = document.getElementById("fidelity")
-const upscaleInput = document.getElementById("upscale")
 const UploadButton = document.getElementById("uploadBtn")
 const settingBtn = document.getElementById("setting")
 const closBtn = document.getElementById("close")
 const saveBtn = document.getElementById("save")
 const timer = document.getElementById("timer")
 const popupWindow = document.getElementById("popup")
-const fidelityError = document.getElementById("fidelity-message")
 const operationError = document.getElementById("operation-error")
 const starContainer = document.getElementById("star-widget")
 const stars = document.querySelectorAll(".star")
@@ -24,6 +21,10 @@ const imageContainer = document.getElementById('imageContainer')
 const before = document.getElementById("before")
 const after = document.getElementById("after")
 const expand = document.getElementById("expand")
+const FidelityRange = document.getElementById("fidelity-range")
+const FidelityValue = document.getElementById("fidelity-value")
+const upscaleRange = document.getElementById("upscale-range")
+const upscaleValue = document.getElementById("upscale-value")
 const mainContainer = document.getElementById("mainContainer")
 
 let files, seconds = 0, timerInterval = null , generatedImage = '', sliderP
@@ -64,22 +65,6 @@ FileInput.addEventListener("change", (event) => {
 UploadButton.addEventListener("click", async () => {
     // check again if the image has been uploaded and the button is not disabled
     if(files.length === 0 || UploadButton.getAttribute("disabled")) return 
-    // check if the fidelity prompt is provided and is a correct number
-    const fidelity = fidelityInput.value
-    if(fidelity){
-        const fidelityNumber = parseInt(fidelity)
-        if(fidelityNumber > 1 || fidelityNumber < 0){
-            fidelityError.innerHTML= `
-                <p class="text-red-500 text-sm font-semibold"> invalid number </p>
-            `
-            return
-        }
-        else{
-            // Clear if there is no error
-            fidelityError.innerHTML = ``
-
-        }
-    }
     startTimer()
     // clear if there were any previous errors.
     operationError.innerHTML = ``
@@ -89,27 +74,33 @@ UploadButton.addEventListener("click", async () => {
     UploadButton.innerHTML = ''
     // Disable the file fields and the stars
     FileInput.disabled = true
-    fidelityInput.disabled = true
-    upscaleInput.disabled = true
+    FidelityRange.disabled = true
+    FidelityValue.disabled = true
+    upscaleRange.disabled = true
+    upscaleValue.disabled = true
     settingBtn.disabled = true
     expand.disabled = true
     dropZone.disabled = true
+
+    if(expand.classList.contains('hidden')){
+        UploadButton.classList.add("mb-14")
+    }
 
     if(!starContainer.classList.contains("hidden")){
         starContainer.classList.add("hidden")
     }
     // store the fidelity and upscale value in the local storage
     chrome.storage.local.set({ userData: {
-        fidelity,
-        upscale: upscaleInput.value,
+        fidelity: FidelityRange.value,
+        upscale: upscaleRange.value,
     }}, function() {
         console.log('config numbers saved locally');
     });
     
     const form = new FormData()
     form.set("file", files[0])
-    form.set("fidelity", fidelity)
-    form.set("upscale", upscaleInput.value)
+    form.set("fidelity", FidelityRange.value)
+    form.set("upscale", upscaleRange.value)
     form.set("enhance", enhance.value)
     form.set("upsample", upsample.value)
     form.set("token", tokenInput.value.trim())
@@ -126,7 +117,7 @@ UploadButton.addEventListener("click", async () => {
                 <p class="text-black text-base font-semibold"> verifying token... </p>
             </div>
             `
-            const response = await fetch("https://yegarabet.vercel.app/api/restore/verifyToken", {
+            const response = await fetch("http://localhost:3000/api/restore/verifyToken", {
                 method: "POST",
                 body: JSON.stringify({
                     token: token || null
@@ -148,7 +139,7 @@ UploadButton.addEventListener("click", async () => {
         </div>
         `
         // Create a post request to the proxy server by sending the image
-        const response1 =  await fetch("https://yegarabet.vercel.app/api/restore/create-prediction", {
+        const response1 =  await fetch("http://localhost:3000/api/restore/create-prediction", {
             method: "POST",
             body: form
         })
@@ -182,7 +173,7 @@ UploadButton.addEventListener("click", async () => {
         </div>
     `
         // make a get request to the proxy server again
-        const response2 = await fetch("https://yegarabet.vercel.app/api/restore/get-prediction", {
+        const response2 = await fetch("http://localhost:3000/api/restore/get-prediction", {
             method: "POST",
             body: JSON.stringify({
                 predictionId,
@@ -197,7 +188,6 @@ UploadButton.addEventListener("click", async () => {
         const {output} = data2
         // retrieve the first result from the outputs
         const imageURL = output.replaceAll("'", "")
-        console.log(`result`, imageURL )
         generatedImage = imageURL
         stopTimer()
         // open it in a new tab
@@ -206,7 +196,7 @@ UploadButton.addEventListener("click", async () => {
         const reader = new FileReader()
         reader.onload = function(e){
             // create an image element
-            const newimg = document.createElement('img')
+            const newimg = document.createElement('img');
             newimg.src = imageURL
             newimg.alt = 'restored image'
             newimg.className = "image-after slider-image object-contain"
@@ -239,19 +229,23 @@ UploadButton.addEventListener("click", async () => {
         operationError.innerHTML = `
         <p class="text-red-500 text-sm font-semibold mt-3"> ${error.message ? error.message : "something went wrong"} </p>
         `
+        UploadButton.disabled = false
         stopTimer()
         console.log(error)
     }
     finally{
         // Enable the input fields
         FileInput.disabled = false
-        fidelityInput.disabled = false
-        upscaleInput.disabled = false
+        FidelityRange.disabled = false
+        FidelityValue.disabled = false
+        upscaleRange.disabled = false
+        upscaleValue.disabled = false
         tokenInput.disabled = false
-        UploadButton.disabled = false
         settingBtn.disabled = false
         expand.disabled = false
         dropZone.disabled = false
+
+        UploadButton.classList.remove("mb-14")
         // return the upload button state to the original
         UploadButton.innerHTML = `
         <p class="text-base text-black font-semibold"> Start </p>
@@ -331,8 +325,10 @@ document.addEventListener('DOMContentLoaded', function() {
     chrome.storage.local.get('userData', function(result) {
         if (result.userData) {
             const data = result.userData
-            fidelityInput.value = data.fidelity
-            upscaleInput.value = data.upscale
+            FidelityRange.value = data.fidelity
+            FidelityValue.value = data.fidelity
+            upscaleRange.value = data.upscale
+            upscaleValue.value = data.upscale
         } 
     });
     chrome.storage.local.get("rating", function(result){
@@ -393,6 +389,7 @@ saveBtn.addEventListener("click", () => {
 
 // close the preview section
 closeRedBtn.addEventListener("click", () => {
+    UploadButton.disabled = false
     previewContainer.classList.add("hidden")
     dragAndDropContainer.classList.remove("hidden")
 })
@@ -520,4 +517,37 @@ expand.addEventListener("click", () => {
     chrome.runtime.sendMessage({action: 'expand'});
     // close the current popup
     window.close()
+})
+
+// updating the fidelity value
+FidelityRange.addEventListener("input", () => {
+    FidelityValue.value =  FidelityRange.value
+})
+
+upscaleRange.addEventListener('input', () => {
+    upscaleValue.value = upscaleRange.value
+})
+
+FidelityValue.addEventListener('input', () => {
+    if(FidelityValue.value > 1 || FidelityValue.value < 0.1){
+        FidelityRange.value = 0.5
+    }
+    else if(0.1 <= FidelityValue.value <= 1) {
+        FidelityRange.value = FidelityValue.value
+    }
+    else {
+        FidelityRange.value = 0.5
+    }
+})
+
+upscaleValue.addEventListener('input', () => {
+    if(upscaleValue.value > 4 || upscaleValue < 1){
+        upscaleRange.value = 2
+    }
+    else if(1 <= upscaleValue.value <= 4) {
+        upscaleRange.value = upscaleValue.value
+    }
+    else {
+        upscaleRange.value = 2
+    }
 })

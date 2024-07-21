@@ -37,10 +37,12 @@
             height: 100%;
             object-fit: cover;
             object-position: left;
+            touch-action: none;
         }
         .image-before {
             position: absolute;
             inset: 0;
+            z-index: 10;
             width: var(--position);
         }
         .slider-line {
@@ -76,10 +78,10 @@
     </style>
 </head>
 <body id="mainContainer" class="bg-background">
-    <main class="w-full h-full flex justify-center">
-        <section class="w-[390px] h-auto pt-4 pb-10 pr-4 rounded-sm ">
+    <main class="w-full h-full flex justify-center overflow-y-hidden">
+        <section class="w-full h-full pt-4 pb-20 pr-4 rounded-sm ">
             <div class="relative">
-                <div class="w-full flex justify-end gap-6 mb-4">
+                <div class="w-full flex justify-end gap-6 mb-4 pr-4">
                     <button id="expand" class="hidden">
                         <img src="./expand.svg" alt="expand icon" class="w-6 h-5" />
                     </button>
@@ -121,8 +123,8 @@
                     </div>
                 </div>
             </div>
-            <div class="flex flex-col items-center mt-7">
-                <div id="preview" class="w-[300px] h-[300px] hidden mt-10 mb-6 relative border border-dotted border-primary rounded-md">
+            <div class="flex flex-col items-center mt-7 mb-6">
+                <div id="preview" class="w-3/4 h-[400px] mt-10 mb-6 relative border border-dotted border-primary rounded-md">
                     <div class="absolute right-0 -top-10 flex items-center gap-6 z-10 pr-7">
                         <button id="download">
                             <img src="./download.png" alt="close-icon" class="w-7 h-7" />
@@ -132,14 +134,16 @@
                         </button>
                     </div>
                     <div class="container">
-                        <div id="imageContainer" class="max-w-[300px] max-h-[300px] aspect-square">
+                        <div id="imageContainer" class="w-3/4 h-[400px] aspect-square">
+                            <img src="./old.jpg" alt="before-image" class="image-before slider-image object-contain" />
+                            <img src="./new.png" alt="after-image" class="image-after slider-image object-contain" />
                         </div>
                         <input type="range" min="0" max="100" value="50" class="slider"/>
                         <div class="slider-line"></div>
-                        <div id="before" class="absolute left-0 top-[46%] bg-[#dfdfd7] p-1 before">
+                        <div id="before" class="absolute left-0 bottom-5 bg-[#dfdfd7] opacity-75 p-1">
                             <p class="text-xs text-black"> Before </p>
                         </div>
-                        <div id="after" class="absolute right-0 top-[46%] bg-[#dfdfd7] p-1">
+                        <div id="after" class="absolute right-0 bottom-5 bg-[#dfdfd7] opacity-75 p-1">
                             <p class="text-xs text-black"> After </p>
                         </div> 
                         <div class="slider-button" aria-hidden="true">
@@ -147,31 +151,48 @@
                         </div>
                     </div>
                 </div>
-                <div id="draganddrop" draggable="true" class="w-[250px] h-[100px] border border-dashed border-button rounded-md flex items-center justify-center">
+                <div id="draganddrop" draggable="true" class="w-3/4 h-[350px] border border-dashed border-button rounded-md hidden items-center justify-center">
                     <input type="file" id="fileInput" class="hidden" />
-                    <button id="dropzone" class="flex flex-col items-center text-sm gap-2 text-primary px-4 disabled:cursor-not-allowed">
+                    <button id="dropzone" class="flex flex-col items-center gap-2 text-primary px-4 disabled:cursor-not-allowed text-base">
                         <p> Drag & Drop your face photo </p>
                         <p> here or Click to Select </p>
                     </button>
                 </div>
-                <label class="text-base text-primary w-[225px] flex justify-start mt-6"> Fidelity </label>
-                <input type="text" id="fidelity" value="0.1" class="w-[225px] mt-3 bg-primary rounded-md px-3 py-2.5 text-sm text-black focus-visible:outline-none disabled:cursor-not-allowed" />
-                <span id="fidelity-message" class="w-[225px] flex justify-start mt-3"> </span>
-                <label class="text-base text-primary w-[225px] flex justify-start mt-3"> Upscale </label>
-                <input type="text" id="upscale" value="2" class="w-[225px] mt-3 bg-primary rounded-md px-3 py-2.5 text-sm text-black focus-visible:outline-none disabled:cursor-not-allowed" />
-                <span id="operation-error" class="w-[225px] flex justify-start mt-3"> </span>
-                <div id="timer" class="mt-2"></div>
-                <button id="uploadBtn" disabled class="bg-button w-[225px] mt-6 px-4 py-2.5 rounded-md focus-visible:outline-none disabled:cursor-not-allowed">
-                    <p class="text-base text-black font-semibold"> Start </p>
-                </button>
-                <div id="star-widget" class="mt-7 flex flex-col items-start justify-start gap-5">
-                    <h3 class="text-2xl text-main font-semibold ml-2"> Give us a rating </h3>
-                    <div class="flex space-x-3 mt-2">
-                        <i class="star fa fa-star text-2xl cursor-pointer disabled:cursor-not-allowed"></i>
-                        <i class="star fa fa-star text-2xl cursor-pointer disabled:cursor-not-allowed"></i>
-                        <i class="star fa fa-star text-2xl cursor-pointer disabled:cursor-not-allowed"></i>
-                        <i class="star fa fa-star text-2xl cursor-pointer disabled:cursor-not-allowed"></i>
-                        <i class="star fa fa-star text-2xl cursor-pointer disabled:cursor-not-allowed"></i>
+                <div class="mt-10 w-3/4 flex justify-center">
+                    <div>
+                        <label class="text-base text-primary w-[225px] flex justify-start mt-6"> Fidelity </label>
+                        <div class="flex items-center gap-3 mt-4 pl-2">
+                            <div class="px-4 py-2 border border-[#9999a0]">
+                                <input type="text" value="0.5" id="fidelity-value" class="text-base text-primary bg-background border-none w-5 focus-visible:outline-none disabled:cursor-not-allowed" />
+                            </div>
+                            <input type="range" id="fidelity-range" min="0.1" max="1" value="0.5" step="0.1" class="w-[200px] h-auto mt-1.5 focus-visible:outline-none touch-none disabled:cursor-not-allowed" />
+                        </div>
+                        <label class="text-base text-primary w-[225px] flex justify-start mt-6"> Upscale </label>
+                        <div class="flex items-center gap-3 mt-5 pl-2">
+                            <div class="px-4 py-2 border border-[#9999a0]">
+                                <input type="text" value="2" id="upscale-value" class="text-base text-primary bg-background border-none w-5 focus-visible:outline-none disabled:cursor-not-allowed" />
+                            </div>
+                            <input type="range" id="upscale-range" min="1" max="4" value="2" step="1" class="w-[200px] h-auto mt-2 focus-visible:outline-none touch-none disabled:cursor-not-allowed" />
+                        </div>
+                        <span id="operation-error" class="w-[225px] flex justify-start mt-3"> </span>
+                        <div class="pl-10">
+                            <div id="timer" class="my-4 ml-10">
+                                <p class="text-primary text-base"> 2 </p>
+                            </div>
+                            <button id="uploadBtn" disabled class="bg-button w-[225px] mt-6 px-4 py-2.5 rounded-md focus-visible:outline-none disabled:cursor-not-allowed">
+                                <p class="text-base text-black font-semibold"> Start </p>
+                            </button>
+                            <div id="star-widget" class="mt-10 ml-5 flex flex-col items-start justify-start gap-5">
+                                <h3 class="text-2xl text-main font-semibold ml-2"> Give us a rating </h3>
+                                <div class="flex space-x-3 pl-3">
+                                    <i class="star fa fa-star text-xl cursor-pointer disabled:cursor-not-allowed"></i>
+                                    <i class="star fa fa-star text-xl cursor-pointer disabled:cursor-not-allowed"></i>
+                                    <i class="star fa fa-star text-xl cursor-pointer disabled:cursor-not-allowed"></i>
+                                    <i class="star fa fa-star text-xl cursor-pointer disabled:cursor-not-allowed"></i>
+                                    <i class="star fa fa-star text-xl cursor-pointer disabled:cursor-not-allowed"></i>
+                                </div>
+                            </div> 
+                        </div>
                     </div>
                 </div>
             </div>
@@ -179,4 +200,4 @@
     </main>
     <script src="popup.js"></script>
 </body>
-</html>
+</html
