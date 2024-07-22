@@ -20,7 +20,6 @@ const container = document.querySelector(".container")
 const imageContainer = document.getElementById('imageContainer')
 const before = document.getElementById("before")
 const after = document.getElementById("after")
-const expand = document.getElementById("expand")
 const FidelityRange = document.getElementById("fidelity-range")
 const FidelityValue = document.getElementById("fidelity-value")
 const upscaleRange = document.getElementById("upscale-range")
@@ -77,7 +76,6 @@ UploadButton.addEventListener("click", async () => {
     upscaleRange.disabled = true
     upscaleValue.disabled = true
     settingBtn.disabled = true
-    expand.disabled = true
     dropZone.disabled = true
 
     if(!starContainer.classList.contains("hidden")){
@@ -193,17 +191,17 @@ UploadButton.addEventListener("click", async () => {
             const newimg = document.createElement('img');
             newimg.src = imageURL
             newimg.alt = 'restored image'
-            newimg.className = "image-after slider-image object-contain"
+            newimg.className = "image-after slider-image w-full h-full object-cover object-center"
     
             const oldimg = document.createElement('img')
             oldimg.src = e.target.result
             oldimg.alt = "original image"
-            oldimg.className = "image-before slider-image object-contain"
+            oldimg.className = "image-before slider-image"
     
             const div = document.createElement('div')
     
             div.innerHTML = `
-                <div>
+                <div class="w-[600px] h-[350px]">
                     ${oldimg.outerHTML}
                     ${newimg.outerHTML}
                 </div>
@@ -236,7 +234,6 @@ UploadButton.addEventListener("click", async () => {
         upscaleValue.disabled = false
         tokenInput.disabled = false
         settingBtn.disabled = false
-        expand.disabled = false
         dropZone.disabled = false
 
         UploadButton.classList.remove("mb-14")
@@ -504,13 +501,6 @@ previewContainer.addEventListener('mouseenter', () => {
 previewContainer.addEventListener('mouseleave', () => {
     before.classList.remove('hidden')
     after.classList.remove('hidden')
-})
-
-expand.addEventListener("click", () => {
-    // send a message to open a new window
-    chrome.runtime.sendMessage({action: 'expand'});
-    // close the current popup
-    window.close()
 })
 
 // updating the fidelity value

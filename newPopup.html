@@ -24,7 +24,7 @@
             overflow: hidden;
             width: 100%;
             height: 100%;
-            --position: 50%;
+            --position: 49%;
         }
         .slider {
             position: absolute;
@@ -37,13 +37,13 @@
             height: 100%;
             object-fit: cover;
             object-position: left;
-            touch-action: none;
+            pointer-events: none;
         }
         .image-before {
             position: absolute;
             inset: 0;
-            z-index: 10;
             width: var(--position);
+            transform: scaleY(1.5);
         }
         .slider-line {
             position: absolute;
@@ -69,22 +69,13 @@
             pointer-events: none;
             z-index: 10;
         }
-        #before[style*="--position:0"]{
-            opacity: 0;
-        }
-        #after[style*="--position:100"]{
-            opacity: 0;
-        }
     </style>
 </head>
 <body id="mainContainer" class="bg-background">
     <main class="w-full h-full flex justify-center overflow-y-hidden">
-        <section class="w-full h-full pt-4 pb-20 pr-4 rounded-sm ">
-            <div class="relative">
-                <div class="w-full flex justify-end gap-6 mb-4 pr-4">
-                    <button id="expand" class="hidden">
-                        <img src="./expand.svg" alt="expand icon" class="w-6 h-5" />
-                    </button>
+        <section class="w-full pt-4 pb-20 pr-4 rounded-sm ">
+            <div class="relative ml-10">
+                <div class="flex justify-end gap-6 mb-4 lg:mr-16">
                     <button id="setting" class="disabled:cursor-not-allowed w-10" >
                         <img src="./cog.png" alt="setting-icon"  class="w-7 h-7" />
                     </button>
@@ -124,50 +115,48 @@
                 </div>
             </div>
             <div class="flex flex-col items-center mt-7 mb-6">
-                <div id="preview" class="w-3/4 h-[400px] mt-10 mb-6 relative border border-dotted border-primary rounded-md">
-                    <div class="absolute right-0 -top-10 flex items-center gap-6 z-10 pr-7">
-                        <button id="download">
-                            <img src="./download.png" alt="close-icon" class="w-7 h-7" />
-                        </button>
-                        <button id="closered">
-                            <img src="./closered.png" alt="close-icon" class="w-4 h-4" />
+                <div class="flex flex-col items-center mt-7">
+                    <div id="preview" class="w-[600px] h-[350px] hidden mt-10 mb-6 relative border border-dotted border-primary rounded-md">
+                        <div class="absolute right-0 -top-10 flex items-center gap-6 z-10 pr-7">
+                            <button id="download">
+                                <img src="./download.png" alt="close-icon" class="w-7 h-7" />
+                            </button>
+                            <button id="closered">
+                                <img src="./closered.png" alt="close-icon" class="w-4 h-4" />
+                            </button>
+                        </div>
+                        <div class="container">
+                            <div id="imageContainer" class="w-[600px] h-[350px]">
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="slider"/>
+                            <div class="slider-line"></div>
+                            <div id="before" class="absolute left-0 bottom-5 bg-[#dfdfd7] opacity-75 p-1">
+                                <p class="text-xs text-black"> Before </p>
+                            </div>
+                            <div id="after" class="absolute right-0 bottom-5 bg-[#dfdfd7] opacity-75 p-1">
+                                <p class="text-xs text-black"> After </p>
+                            </div> 
+                            <div class="slider-button" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#000000" viewBox="0 0 256 256"><path d="M136,40V216a8,8,0,0,1-16,0V40a8,8,0,0,1,16,0ZM96,120H35.31l18.35-18.34A8,8,0,0,0,42.34,90.34l-32,32a8,8,0,0,0,0,11.32l32,32a8,8,0,0,0,11.32-11.32L35.31,136H96a8,8,0,0,0,0-16Zm149.66,2.34-32-32a8,8,0,0,0-11.32,11.32L220.69,120H160a8,8,0,0,0,0,16h60.69l-18.35,18.34a8,8,0,0,0,11.32,11.32l32-32A8,8,0,0,0,245.66,122.34Z"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="draganddrop" draggable="true" class="w-[600px] h-[350px] border border-dashed border-button rounded-md flex items-center justify-center">
+                        <input type="file" id="fileInput" class="hidden w-full h-full" />
+                        <button id="dropzone" class="flex flex-col items-center text-sm gap-2 text-primary px-4 disabled:cursor-not-allowed">
+                            <p> Drag & Drop your face photo </p>
+                            <p> here or Click to Select </p>
                         </button>
                     </div>
-                    <div class="container">
-                        <div id="imageContainer" class="w-3/4 h-[400px] aspect-square">
-                            <img src="./old.jpg" alt="before-image" class="image-before slider-image object-contain" />
-                            <img src="./new.png" alt="after-image" class="image-after slider-image object-contain" />
-                        </div>
-                        <input type="range" min="0" max="100" value="50" class="slider"/>
-                        <div class="slider-line"></div>
-                        <div id="before" class="absolute left-0 bottom-5 bg-[#dfdfd7] opacity-75 p-1">
-                            <p class="text-xs text-black"> Before </p>
-                        </div>
-                        <div id="after" class="absolute right-0 bottom-5 bg-[#dfdfd7] opacity-75 p-1">
-                            <p class="text-xs text-black"> After </p>
-                        </div> 
-                        <div class="slider-button" aria-hidden="true">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#000000" viewBox="0 0 256 256"><path d="M136,40V216a8,8,0,0,1-16,0V40a8,8,0,0,1,16,0ZM96,120H35.31l18.35-18.34A8,8,0,0,0,42.34,90.34l-32,32a8,8,0,0,0,0,11.32l32,32a8,8,0,0,0,11.32-11.32L35.31,136H96a8,8,0,0,0,0-16Zm149.66,2.34-32-32a8,8,0,0,0-11.32,11.32L220.69,120H160a8,8,0,0,0,0,16h60.69l-18.35,18.34a8,8,0,0,0,11.32,11.32l32-32A8,8,0,0,0,245.66,122.34Z"></path></svg>
-                        </div>
-                    </div>
-                </div>
-                <div id="draganddrop" draggable="true" class="w-3/4 h-[350px] border border-dashed border-button rounded-md hidden items-center justify-center">
-                    <input type="file" id="fileInput" class="hidden" />
-                    <button id="dropzone" class="flex flex-col items-center gap-2 text-primary px-4 disabled:cursor-not-allowed text-base">
-                        <p> Drag & Drop your face photo </p>
-                        <p> here or Click to Select </p>
-                    </button>
-                </div>
-                <div class="mt-10 w-3/4 flex justify-center">
-                    <div>
-                        <label class="text-base text-primary w-[225px] flex justify-start mt-6"> Fidelity </label>
+                    <div class="mt-6">
+                        <label class="text-base text-primary w-[225px] flex justify-start mt-6 mr-3"> Fidelity </label>
                         <div class="flex items-center gap-3 mt-4 pl-2">
                             <div class="px-4 py-2 border border-[#9999a0]">
                                 <input type="text" value="0.5" id="fidelity-value" class="text-base text-primary bg-background border-none w-5 focus-visible:outline-none disabled:cursor-not-allowed" />
                             </div>
                             <input type="range" id="fidelity-range" min="0.1" max="1" value="0.5" step="0.1" class="w-[200px] h-auto mt-1.5 focus-visible:outline-none touch-none disabled:cursor-not-allowed" />
                         </div>
-                        <label class="text-base text-primary w-[225px] flex justify-start mt-6"> Upscale </label>
+                        <label class="text-base text-primary w-[225px] flex justify-start mt-5 mr-3"> Upscale </label>
                         <div class="flex items-center gap-3 mt-5 pl-2">
                             <div class="px-4 py-2 border border-[#9999a0]">
                                 <input type="text" value="2" id="upscale-value" class="text-base text-primary bg-background border-none w-5 focus-visible:outline-none disabled:cursor-not-allowed" />
@@ -175,29 +164,31 @@
                             <input type="range" id="upscale-range" min="1" max="4" value="2" step="1" class="w-[200px] h-auto mt-2 focus-visible:outline-none touch-none disabled:cursor-not-allowed" />
                         </div>
                         <span id="operation-error" class="w-[225px] flex justify-start mt-3"> </span>
-                        <div class="pl-10">
-                            <div id="timer" class="my-4 ml-10">
-                                <p class="text-primary text-base"> 2 </p>
-                            </div>
-                            <button id="uploadBtn" disabled class="bg-button w-[225px] mt-6 px-4 py-2.5 rounded-md focus-visible:outline-none disabled:cursor-not-allowed">
+                        <div class="w-3/4 flex justify-center pl-16">
+                            <div id="timer" class="mt-2"></div>
+                        </div>
+                        <div class="mb-10 mt-4">
+                            <button id="uploadBtn" disabled class="bg-button w-[300px] mt-3 px-4 py-2.5 rounded-md focus-visible:outline-none disabled:cursor-not-allowed ml-2">
                                 <p class="text-base text-black font-semibold"> Start </p>
                             </button>
-                            <div id="star-widget" class="mt-10 ml-5 flex flex-col items-start justify-start gap-5">
-                                <h3 class="text-2xl text-main font-semibold ml-2"> Give us a rating </h3>
-                                <div class="flex space-x-3 pl-3">
-                                    <i class="star fa fa-star text-xl cursor-pointer disabled:cursor-not-allowed"></i>
-                                    <i class="star fa fa-star text-xl cursor-pointer disabled:cursor-not-allowed"></i>
-                                    <i class="star fa fa-star text-xl cursor-pointer disabled:cursor-not-allowed"></i>
-                                    <i class="star fa fa-star text-xl cursor-pointer disabled:cursor-not-allowed"></i>
-                                    <i class="star fa fa-star text-xl cursor-pointer disabled:cursor-not-allowed"></i>
+                            <div class="pl-6">
+                                <div id="star-widget" class="mt-7 flex flex-col items-start justify-start gap-5 ml-12">
+                                    <h3 class="text-2xl text-main font-semibold ml-2"> Give us a rating </h3>
+                                    <div class="flex space-x-3 pl-3">
+                                        <i class="star fa fa-star text-xl cursor-pointer disabled:cursor-not-allowed"></i>
+                                        <i class="star fa fa-star text-xl cursor-pointer disabled:cursor-not-allowed"></i>
+                                        <i class="star fa fa-star text-xl cursor-pointer disabled:cursor-not-allowed"></i>
+                                        <i class="star fa fa-star text-xl cursor-pointer disabled:cursor-not-allowed"></i>
+                                        <i class="star fa fa-star text-xl cursor-pointer disabled:cursor-not-allowed"></i>
+                                    </div>
                                 </div>
-                            </div> 
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
     </main>
-    <script src="popup.js"></script>
+    <script src="wide.js"></script>
 </body>
 </html

@@ -37,7 +37,7 @@
             height: 100%;
             object-fit: cover;
             object-position: left;
-            touch-action: none;
+            pointer-events: none;
         }
         .image-before {
             position: absolute;
@@ -70,7 +70,7 @@
         }
     </style>
 </head>
-<body id="mainContainer" class="bg-background w-[390px] h-[400px] pt-4 pb-10 pr-4 rounded-sm ">
+<body id="mainContainer" class="bg-background w-[390px] h-[450px] pt-4 pb-10 pr-4 rounded-sm ">
     <div class="relative">
         <div class="w-full flex justify-end gap-6 mb-4">
             <button id="expand" class="disabled:cursor-not-allowed">
@@ -163,7 +163,7 @@
         </div>
         <span id="operation-error" class="w-[225px] flex justify-start mt-3"> </span>
         <div id="timer" class="mt-2"></div>
-        <div class="mb-10 pl-6">
+        <div class="pb-8 pl-6">
             <button id="uploadBtn" disabled class="bg-button w-[225px] mt-3 px-4 py-2.5 rounded-md focus-visible:outline-none disabled:cursor-not-allowed">
                 <p class="text-base text-black font-semibold"> Start </p>
             </button>
